@@ -5,9 +5,10 @@ name: docker image release
 # If you forget to enable, the action will fail on push with a 401 error. Just re-run the failed action after enabling.
 
 on:
-  push:
-    tags:
-    - 'v[0-9]+.[0-9]+.[0-9]+' # ignore rc
+  workflow_dispatch:
+  # push:
+  #   tags:
+  #   - 'v[0-9]+.[0-9]+.[0-9]+' # ignore rc
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

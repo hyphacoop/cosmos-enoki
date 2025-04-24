@@ -3,9 +3,10 @@ name: "Release Binary"
 # Pairs with .goreleaser.yaml file for configuration.
 
 on:
-  push:
-    tags:
-    - '**'
+  workflow_dispatch:
+  # push:
+  #   tags:
+  #   - '**'
 
 # Test Locally with:
 # goreleaser build --skip-validate --snapshot --clean
