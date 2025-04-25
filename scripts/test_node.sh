@@ -10,7 +10,7 @@ set -eu
 export KEY="acc0"
 export KEY2="acc1"
 
-export CHAIN_ID=${CHAIN_ID:-"localchain-1"}
+export CHAIN_ID=${CHAIN_ID:-"test-enoki-1"}
 export MONIKER="localvalidator"
 export KEYALGO="secp256k1"
 export KEYRING=${KEYRING:-"test"}
