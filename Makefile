@@ -310,7 +310,7 @@ testnet: setup-testnet
 	spawn local-ic start testnet
 
 sh-testnet: mod-tidy
-	CHAIN_ID="test-enoki-1" BLOCK_TIME="1000ms" CLEAN=true sh scripts/test_node.sh
+	CHAIN_ID="test-enoki-1" BLOCK_TIME="2000ms" CLEAN=true sh scripts/test_node.sh
 
 .PHONY: setup-testnet set-testnet-configs testnet testnet-basic sh-testnet
 
