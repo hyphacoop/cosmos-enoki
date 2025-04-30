@@ -9,7 +9,6 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	circuitkeeper "cosmossdk.io/x/circuit/keeper"
 	txsigning "cosmossdk.io/x/tx/signing"
-	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -17,7 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
+	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 )
 
 // BankKeeper defines the contract needed for supply related APIs (noalias)
@@ -50,8 +49,8 @@ type HandlerOptions struct {
 	SigGasConsumer         func(meter storetypes.GasMeter, sig signing.SignatureV2, params authtypes.Params) error
 	TxFeeChecker           ante.TxFeeChecker // safe to be nil
 
-	WasmConfig            *wasmtypes.WasmConfig
-	WasmKeeper            *wasmkeeper.Keeper
+	WasmConfig *wasmtypes.NodeConfig
+	// WasmKeeper            *wasmkeeper.Keeper
 	TXCounterStoreService corestoretypes.KVStoreService
 
 	IBCKeeper     *ibckeeper.Keeper
@@ -85,9 +84,9 @@ func (options HandlerOptions) Validate() error {
 	if options.TXCounterStoreService == nil {
 		return errorsmod.Wrap(errortypes.ErrLogic, "wasm store service is required for ante builder")
 	}
-	if options.WasmKeeper == nil {
-		return errorsmod.Wrap(errortypes.ErrLogic, "wasm keeper is required for ante builder")
-	}
+	// if options.WasmKeeper == nil {
+	// 	return errorsmod.Wrap(errortypes.ErrLogic, "wasm keeper is required for ante builder")
+	// }
 
 	return nil
 }

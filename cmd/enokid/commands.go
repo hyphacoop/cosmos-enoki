@@ -55,7 +55,7 @@ func initCometBFTConfig() *cmtcfg.Config {
 type CustomAppConfig struct {
 	serverconfig.Config
 
-	Wasm wasmtypes.WasmConfig `mapstructure:"wasm"`
+	Wasm wasmtypes.NodeConfig `mapstructure:"wasm"`
 }
 
 // initAppConfig helps to override default appConfig template and configs.
@@ -78,12 +78,12 @@ func initAppConfig() (string, interface{}) {
 	//   own app.toml to override, or use this default value.
 	//
 	// In simapp, we set the min gas prices to 0.
-	srvCfg.MinGasPrices = "0stake"
+	srvCfg.MinGasPrices = "0uoki"
 	// srvCfg.BaseConfig.IAVLDisableFastNode = true // disable fastnode by default
 
 	customAppConfig := CustomAppConfig{
 		Config: *srvCfg,
-		Wasm:   wasmtypes.DefaultWasmConfig(),
+		Wasm:   wasmtypes.DefaultNodeConfig(),
 	}
 
 	customAppTemplate := serverconfig.DefaultConfigTemplate
