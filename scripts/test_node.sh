@@ -93,8 +93,6 @@ from_scratch () {
   update_test_genesis '.app_state["evm"]["params"]["active_static_precompiles"]=["0x0000000000000000000000000000000000000100","0x0000000000000000000000000000000000000400","0x0000000000000000000000000000000000000800","0x0000000000000000000000000000000000000801","0x0000000000000000000000000000000000000802","0x0000000000000000000000000000000000000803","0x0000000000000000000000000000000000000804","0x0000000000000000000000000000000000000805"]'
   update_test_genesis '.app_state["erc20"]["params"]["native_precompiles"]=["0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"]' # https://eips.ethereum.org/EIPS/eip-7528
   update_test_genesis `printf '.app_state["erc20"]["token_pairs"]=[{contract_owner:1,erc20_address:"0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",denom:"%s",enabled:true}]' $DENOM`
-  update_test_genesis '.app_state["feemarket"]["params"]["no_base_fee"]=true'
-  update_test_genesis '.app_state["feemarket"]["params"]["base_fee"]="0.000000000000000000"'
 
   # staking
   update_test_genesis `printf '.app_state["staking"]["params"]["bond_denom"]="%s"' $DENOM`
@@ -114,6 +112,10 @@ from_scratch () {
   update_test_genesis '.app_state["tokenfactory"]["params"]["denom_creation_fee"]=[]'
   update_test_genesis '.app_state["tokenfactory"]["params"]["denom_creation_gas_consume"]=100000'
 
+  # feemarket 
+  update_test_genesis `printf '.app_state["feemarket"]["params"]["fee_denom"]="%s"' $DENOM`
+  update_test_genesis '.app_state["feemarket"]["params"]["min_base_gas_price"]="0.005"'
+  update_test_genesis '.app_state["feemarket"]["state"]["base_gas_price"]="0.5"'
 
   BASE_GENESIS_ALLOCATIONS="100000000000000000000000000$DENOM,100000000test"
 

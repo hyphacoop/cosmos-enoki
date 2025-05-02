@@ -51,6 +51,8 @@ require (
 require (
 	github.com/CosmWasm/wasmvm/v2 v2.2.3
 	github.com/cosmos/ibc-go/modules/light-clients/08-wasm/v10 v10.2.0
+	github.com/skip-mev/feemarket v1.1.1 // Replace with the latest version
+
 )
 
 require (
@@ -101,8 +103,8 @@ require (
 	github.com/cosmos/iavl v1.2.4 // indirect
 	github.com/cosmos/ics23/go v0.11.0 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.14.0 // indirect
-	github.com/creachadair/atomicfile v0.3.1 // indirect
-	github.com/creachadair/tomledit v0.0.24 // indirect
+	github.com/creachadair/atomicfile v0.3.3 // indirect
+	github.com/creachadair/tomledit v0.0.26 // indirect
 	github.com/danieljoos/wincred v1.2.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect

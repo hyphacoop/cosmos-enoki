@@ -11,6 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	ibcante "github.com/cosmos/ibc-go/v10/modules/core/ante"
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
+	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
 )
 
 type HandlerOptions struct {
@@ -19,6 +20,7 @@ type HandlerOptions struct {
 	WasmConfig            *wasmtypes.NodeConfig
 	TXCounterStoreService corestoretypes.KVStoreService
 	CircuitKeeper         circuitante.CircuitBreaker
+	FeeMarketKeeper       *feemarketkeeper.Keeper
 }
 
 // NewAnteHandler returns an ante handler responsible for attempting to route an
@@ -36,6 +38,10 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 
 	if options.SignModeHandler == nil {
 		return nil, errors.New("sign mode handler is required for ante builder")
+	}
+
+	if options.FeeMarketKeeper == nil {
+		return nil, errors.New("feemarket handler is required for ante builder")
 	}
 
 	anteDecorators := []sdk.AnteDecorator{

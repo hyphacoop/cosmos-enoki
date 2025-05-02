@@ -153,6 +153,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	enokiante "github.com/hyphacoop/cosmos-enoki/app/ante"
+
+	"github.com/skip-mev/feemarket/x/feemarket"
+	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
+	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 )
 
 const (
@@ -271,6 +275,8 @@ type EnokiApp struct {
 	PacketForwardKeeper *packetforwardkeeper.Keeper
 	RatelimitKeeper     ratelimitkeeper.Keeper
 
+	FeeMarketKeeper *feemarketkeeper.Keeper
+
 	// the module manager
 	ModuleManager      *module.Manager
 	BasicModuleManager module.BasicManager
@@ -369,6 +375,7 @@ func NewEnokiApp(
 		tokenfactorytypes.StoreKey,
 		packetforwardtypes.StoreKey,
 		ratelimittypes.StoreKey,
+		feemarkettypes.StoreKey,
 	)
 
 	tkeys := storetypes.NewTransientStoreKeys(
@@ -499,6 +506,14 @@ func NewEnokiApp(
 		app.AccountKeeper.AddressCodec(),
 	)
 	app.BaseApp.SetCircuitBreaker(&app.CircuitKeeper)
+
+	app.FeeMarketKeeper = feemarketkeeper.NewKeeper(
+		appCodec,
+		keys[feemarkettypes.StoreKey],
+		app.AccountKeeper,
+		&feemarkettypes.TestDenomResolver{},
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
 
 	app.AuthzKeeper = authzkeeper.NewKeeper(
 		runtime.NewKVStoreService(keys[authzkeeper.StoreKey]),
@@ -831,7 +846,7 @@ func NewEnokiApp(
 			app.StakingKeeper,
 			app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), app.GetSubspace(wasmtypes.ModuleName),
 		),
-
+		feemarket.NewAppModule(appCodec, *app.FeeMarketKeeper),
 		ibc.NewAppModule(app.IBCKeeper),
 		transfer.NewAppModule(app.TransferKeeper),
 		ica.NewAppModule(&app.ICAControllerKeeper, &app.ICAHostKeeper),
@@ -867,6 +882,7 @@ func NewEnokiApp(
 	// NOTE: capability module's beginblocker must come before any modules using capabilities (e.g. IBC)
 	app.ModuleManager.SetOrderBeginBlockers(
 		minttypes.ModuleName,
+		feemarkettypes.ModuleName,
 		distrtypes.ModuleName,
 		slashingtypes.ModuleName,
 		evidencetypes.ModuleName,
@@ -885,6 +901,7 @@ func NewEnokiApp(
 
 	app.ModuleManager.SetOrderEndBlockers(
 		crisistypes.ModuleName,
+		feemarkettypes.ModuleName,
 		govtypes.ModuleName,
 		stakingtypes.ModuleName,
 		genutiltypes.ModuleName,
@@ -929,6 +946,7 @@ func NewEnokiApp(
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		circuittypes.ModuleName,
+		feemarkettypes.ModuleName,
 		// additional non simd modules
 		ibctransfertypes.ModuleName,
 		ibcexported.ModuleName,
@@ -1002,6 +1020,7 @@ func NewEnokiApp(
 			WasmConfig:            &wasmConfig,
 			TXCounterStoreService: runtime.NewKVStoreService(app.keys[wasmtypes.StoreKey]),
 			CircuitKeeper:         &app.CircuitKeeper,
+			FeeMarketKeeper:       app.FeeMarketKeeper,
 		},
 	)
 
@@ -1191,7 +1210,7 @@ func (app *EnokiApp) AutoCliOpts() autocli.AppOptions {
 // DefaultGenesis returns a default genesis from the registered AppModuleBasic's.
 func (a *EnokiApp) DefaultGenesis() map[string]json.RawMessage {
 	genesis := a.BasicModuleManager.DefaultGenesis(a.appCodec)
-
+	genesis[feemarkettypes.ModuleName] = a.appCodec.MustMarshalJSON(feemarkettypes.DefaultGenesisState())
 	return genesis
 }
 
