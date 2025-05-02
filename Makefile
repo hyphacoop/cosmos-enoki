@@ -70,13 +70,16 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=enoki \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
 		  -s -w
+extldflags = -z noexecstack
 
 ifeq ($(WITH_CLEVELDB),yes)
   ldflags += -X github.com/cosmos/cosmos-sdk/types.DBBackend=cleveldb
 endif
 ifeq ($(LINK_STATICALLY),true)
-	ldflags += -linkmode=external -extldflags "-Wl,-z,muldefs -static"
+	extldflags += -Wl,-z,muldefs -static
+	ldflags += -linkmode=external
 endif
+ldflags += -extldflags "$(extldflags)"
 ldflags += $(LDFLAGS)
 ldflags := $(strip $(ldflags))
 
