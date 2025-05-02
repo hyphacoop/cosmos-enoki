@@ -2,7 +2,3 @@
 // This is done to avoid the unused import errors when building modules. Leave this file unchanged.
 
 package app
-
-import (
-	_ "cosmossdk.io/orm"
-)

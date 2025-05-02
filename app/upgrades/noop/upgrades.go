@@ -8,7 +8,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/types/module"
 
-	"github.com/rollchains/enoki/app/upgrades"
+	"github.com/hyphacoop/cosmos-enoki/app/upgrades"
 )
 
 // NewUpgrade constructor

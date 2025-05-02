@@ -2,7 +2,7 @@ project_name: enoki
 
 release:
   github:
-    owner: rollchains
+    owner: hyphacoop
     name: enoki
   name_template: '{{.Tag}}'
 

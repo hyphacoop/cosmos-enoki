@@ -37,7 +37,7 @@ func TestAppExport(t *testing.T) {
 
 	// Making a new app object with the db, so that initchain hasn't been called
 	var wasmOpts []wasmkeeper.Option = nil
-	newGapp := NewChainApp(
+	newGapp := NewEnokiApp(
 		logger, db, nil, true, simtestutil.NewAppOptionsWithFlagHome(t.TempDir()),
 		wasmOpts,
 	)

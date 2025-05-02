@@ -123,7 +123,7 @@ func TestAppImportExport(t *testing.T) {
 		require.NoError(t, os.RemoveAll(newDir))
 	}()
 
-	newApp := NewChainApp(log.NewNopLogger(), newDB, nil, true, appOptions,
+	newApp := NewEnokiApp(log.NewNopLogger(), newDB, nil, true, appOptions,
 		nil,
 		fauxMerkleModeOpt, baseapp.SetChainID(SimAppChainID))
 
@@ -239,7 +239,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		require.NoError(t, os.RemoveAll(newDir))
 	}()
 
-	newApp := NewChainApp(log.NewNopLogger(), newDB, nil, true, appOptions,
+	newApp := NewEnokiApp(log.NewNopLogger(), newDB, nil, true, appOptions,
 		nil,
 		fauxMerkleModeOpt, baseapp.SetChainID(SimAppChainID))
 
@@ -263,7 +263,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func setupSimulationApp(t *testing.T, msg string) (simtypes.Config, dbm.DB, simtestutil.AppOptionsMap, *ChainApp) {
+func setupSimulationApp(t *testing.T, msg string) (simtypes.Config, dbm.DB, simtestutil.AppOptionsMap, *EnokiApp) {
 	config := simcli.NewConfigFromFlags()
 	config.ChainID = SimAppChainID
 
@@ -282,7 +282,7 @@ func setupSimulationApp(t *testing.T, msg string) (simtypes.Config, dbm.DB, simt
 	appOptions[flags.FlagHome] = dir // ensure a unique folder
 	appOptions[server.FlagInvCheckPeriod] = simcli.FlagPeriodValue
 
-	app := NewChainApp(logger, db, nil, true, appOptions,
+	app := NewEnokiApp(logger, db, nil, true, appOptions,
 		nil,
 		fauxMerkleModeOpt, baseapp.SetChainID(SimAppChainID))
 	return config, db, appOptions, app
@@ -335,7 +335,7 @@ func TestAppStateDeterminism(t *testing.T) {
 			}
 
 			db := dbm.NewMemDB()
-			app := NewChainApp(logger, db, nil, true, appOptions,
+			app := NewEnokiApp(logger, db, nil, true, appOptions,
 				nil,
 				interBlockCacheOpt(), baseapp.SetChainID(SimAppChainID))
 

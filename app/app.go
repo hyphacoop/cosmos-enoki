@@ -84,6 +84,7 @@ import (
 	signingtype "github.com/cosmos/cosmos-sdk/types/tx/signing"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	"github.com/cosmos/cosmos-sdk/x/auth/posthandler"
@@ -151,13 +152,11 @@ import (
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-
-	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
-	chainante "github.com/rollchains/enoki/app/ante"
+	enokiante "github.com/hyphacoop/cosmos-enoki/app/ante"
 )
 
 const (
-	appName      = "enoki"
+	appName      = "Enoki"
 	NodeDir      = ".enoki"
 	Bech32Prefix = "enoki"
 	ChainID      = "localchain-1"
@@ -224,12 +223,12 @@ var maccPerms = map[string][]string{
 }
 
 var (
-	_ runtime.AppI            = (*ChainApp)(nil)
-	_ servertypes.Application = (*ChainApp)(nil)
+	_ runtime.AppI            = (*EnokiApp)(nil)
+	_ servertypes.Application = (*EnokiApp)(nil)
 )
 
-// ChainApp extended ABCI application
-type ChainApp struct {
+// EnokiApp extended ABCI application
+type EnokiApp struct {
 	*baseapp.BaseApp
 	legacyAmino       *codec.LegacyAmino
 	appCodec          codec.Codec
@@ -284,8 +283,8 @@ type ChainApp struct {
 	once         sync.Once
 }
 
-// NewChainApp returns a reference to an initialized ChainApp.
-func NewChainApp(
+// NewEnokiApp returns a reference to an initialized EnokiApp.
+func NewEnokiApp(
 	logger log.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
@@ -293,7 +292,7 @@ func NewChainApp(
 	appOpts servertypes.AppOptions,
 	wasmOpts []wasmkeeper.Option,
 	baseAppOptions ...func(*baseapp.BaseApp),
-) *ChainApp {
+) *EnokiApp {
 
 	interfaceRegistry := GetInterfaceRegistry()
 	appCodec := codec.NewProtoCodec(interfaceRegistry)
@@ -382,7 +381,7 @@ func NewChainApp(
 		panic(err)
 	}
 
-	app := &ChainApp{
+	app := &EnokiApp{
 		BaseApp:           bApp,
 		legacyAmino:       legacyAmino,
 		appCodec:          appCodec,
@@ -416,8 +415,9 @@ func NewChainApp(
 		authtypes.ProtoBaseAccount,
 		maccPerms,
 		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix()),
-		sdk.GetConfig().GetBech32AccountAddrPrefix(),
+		sdk.Bech32MainPrefix,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		authkeeper.WithUnorderedTransactions(false),
 	)
 	app.BankKeeper = bankkeeper.NewBaseKeeper(
 		appCodec,
@@ -858,6 +858,7 @@ func NewChainApp(
 	// NOTE: upgrade module is required to be prioritized
 	app.ModuleManager.SetOrderPreBlockers(
 		upgradetypes.ModuleName,
+		authtypes.ModuleName, // NEW
 	)
 	// During begin block slashing happens after distr.BeginBlocker so that
 	// there is nothing left over in the validator fee pool, so as to keep the
@@ -987,22 +988,32 @@ func NewChainApp(
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 
-	app.setAnteHandler(chainante.HandlerOptions{
-		Cdc:                   app.appCodec,
-		AccountKeeper:         app.AccountKeeper,
-		BankKeeper:            app.BankKeeper,
-		FeegrantKeeper:        app.FeeGrantKeeper,
-		SignModeHandler:       txConfig.SignModeHandler(),
-		IBCKeeper:             app.IBCKeeper,
-		WasmConfig:            &wasmConfig,
-		TXCounterStoreService: runtime.NewKVStoreService(keys[wasmtypes.StoreKey]),
-		CircuitKeeper:         &app.CircuitKeeper,
-		SigGasConsumer:        authante.DefaultSigVerificationGasConsumer,
-	})
+	antehandler, err := enokiante.NewAnteHandler(
+		enokiante.HandlerOptions{
+			HandlerOptions: ante.HandlerOptions{
+				// Cdc:             app.appCodec,
+				AccountKeeper:   app.AccountKeeper,
+				BankKeeper:      app.BankKeeper,
+				FeegrantKeeper:  app.FeeGrantKeeper,
+				SignModeHandler: txConfig.SignModeHandler(),
+				SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
+			},
+			IBCKeeper:             app.IBCKeeper,
+			WasmConfig:            &wasmConfig,
+			TXCounterStoreService: runtime.NewKVStoreService(app.keys[wasmtypes.StoreKey]),
+			CircuitKeeper:         &app.CircuitKeeper,
+		},
+	)
+
+	if err != nil {
+		panic(fmt.Errorf("failed to create AnteHandler: %s", err))
+	}
+
+	app.SetAnteHandler(antehandler)
 
 	// must be before Loading version
 	// requires the snapshot store to be created and registered as a BaseAppOption
-	// see cmd/enokid/root.go: 206 - 214 approx
+	// see cmd/enokid/root.go
 	if manager := app.SnapshotManager(); manager != nil {
 		err := manager.RegisterExtensions(
 			wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper),
@@ -1057,7 +1068,7 @@ func NewChainApp(
 	return app
 }
 
-func (app *ChainApp) FinalizeBlock(req *abci.RequestFinalizeBlock) (*abci.ResponseFinalizeBlock, error) {
+func (app *EnokiApp) FinalizeBlock(req *abci.RequestFinalizeBlock) (*abci.ResponseFinalizeBlock, error) {
 	// when skipping sdk 47 for sdk 50, the upgrade handler is called too late in BaseApp
 	// this is a hack to ensure that the migration is executed when needed and not panics
 	app.once.Do(func() {
@@ -1078,15 +1089,7 @@ func (app *ChainApp) FinalizeBlock(req *abci.RequestFinalizeBlock) (*abci.Respon
 	return app.BaseApp.FinalizeBlock(req)
 }
 
-func (app *ChainApp) setAnteHandler(options chainante.HandlerOptions) {
-	if err := options.Validate(); err != nil {
-		panic(err)
-	}
-
-	app.SetAnteHandler(chainante.NewAnteHandler(options))
-}
-
-func (app *ChainApp) setPostHandler() {
+func (app *EnokiApp) setPostHandler() {
 	postHandler, err := posthandler.NewPostHandler(
 		posthandler.HandlerOptions{},
 	)
@@ -1098,29 +1101,29 @@ func (app *ChainApp) setPostHandler() {
 }
 
 // Name returns the name of the App
-func (app *ChainApp) Name() string { return app.BaseApp.Name() }
+func (app *EnokiApp) Name() string { return app.BaseApp.Name() }
 
 // PreBlocker application updates every pre block
-func (app *ChainApp) PreBlocker(ctx sdk.Context, _ *abci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
+func (app *EnokiApp) PreBlocker(ctx sdk.Context, _ *abci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
 	return app.ModuleManager.PreBlock(ctx)
 }
 
 // BeginBlocker application updates every begin block
-func (app *ChainApp) BeginBlocker(ctx sdk.Context) (sdk.BeginBlock, error) {
+func (app *EnokiApp) BeginBlocker(ctx sdk.Context) (sdk.BeginBlock, error) {
 	return app.ModuleManager.BeginBlock(ctx)
 }
 
 // EndBlocker application updates every end block
-func (app *ChainApp) EndBlocker(ctx sdk.Context) (sdk.EndBlock, error) {
+func (app *EnokiApp) EndBlocker(ctx sdk.Context) (sdk.EndBlock, error) {
 	return app.ModuleManager.EndBlock(ctx)
 }
 
-func (a *ChainApp) Configurator() module.Configurator {
+func (a *EnokiApp) Configurator() module.Configurator {
 	return a.configurator
 }
 
 // InitChainer application update at chain initialization
-func (app *ChainApp) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) (*abci.ResponseInitChain, error) {
+func (app *EnokiApp) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) (*abci.ResponseInitChain, error) {
 	var genesisState GenesisState
 	if err := json.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
 		panic(err)
@@ -1134,7 +1137,7 @@ func (app *ChainApp) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) (*
 }
 
 // LoadHeight loads a particular height
-func (app *ChainApp) LoadHeight(height int64) error {
+func (app *EnokiApp) LoadHeight(height int64) error {
 	return app.LoadVersion(height)
 }
 
@@ -1142,7 +1145,7 @@ func (app *ChainApp) LoadHeight(height int64) error {
 //
 // NOTE: This is solely to be used for testing purposes as it may be desirable
 // for modules to register their own custom testing types.
-func (app *ChainApp) LegacyAmino() *codec.LegacyAmino {
+func (app *EnokiApp) LegacyAmino() *codec.LegacyAmino {
 	return app.legacyAmino
 }
 
@@ -1150,22 +1153,22 @@ func (app *ChainApp) LegacyAmino() *codec.LegacyAmino {
 //
 // NOTE: This is solely to be used for testing purposes as it may be desirable
 // for modules to register their own custom testing types.
-func (app *ChainApp) AppCodec() codec.Codec {
+func (app *EnokiApp) AppCodec() codec.Codec {
 	return app.appCodec
 }
 
-// InterfaceRegistry returns ChainApp's InterfaceRegistry
-func (app *ChainApp) InterfaceRegistry() types.InterfaceRegistry {
+// InterfaceRegistry returns EnokiApp's InterfaceRegistry
+func (app *EnokiApp) InterfaceRegistry() types.InterfaceRegistry {
 	return app.interfaceRegistry
 }
 
-// TxConfig returns ChainApp's TxConfig
-func (app *ChainApp) TxConfig() client.TxConfig {
+// TxConfig returns EnokiApp's TxConfig
+func (app *EnokiApp) TxConfig() client.TxConfig {
 	return app.txConfig
 }
 
 // AutoCliOpts returns the autocli options for the app.
-func (app *ChainApp) AutoCliOpts() autocli.AppOptions {
+func (app *EnokiApp) AutoCliOpts() autocli.AppOptions {
 	modules := make(map[string]appmodule.AppModule, 0)
 	for _, m := range app.ModuleManager.Modules {
 		if moduleWithName, ok := m.(module.HasName); ok {
@@ -1186,7 +1189,7 @@ func (app *ChainApp) AutoCliOpts() autocli.AppOptions {
 }
 
 // DefaultGenesis returns a default genesis from the registered AppModuleBasic's.
-func (a *ChainApp) DefaultGenesis() map[string]json.RawMessage {
+func (a *EnokiApp) DefaultGenesis() map[string]json.RawMessage {
 	genesis := a.BasicModuleManager.DefaultGenesis(a.appCodec)
 
 	return genesis
@@ -1195,12 +1198,12 @@ func (a *ChainApp) DefaultGenesis() map[string]json.RawMessage {
 // GetKey returns the KVStoreKey for the provided store key.
 //
 // NOTE: This is solely to be used for testing purposes.
-func (app *ChainApp) GetKey(storeKey string) *storetypes.KVStoreKey {
+func (app *EnokiApp) GetKey(storeKey string) *storetypes.KVStoreKey {
 	return app.keys[storeKey]
 }
 
 // GetStoreKeys returns all the stored store keys.
-func (app *ChainApp) GetStoreKeys() []storetypes.StoreKey {
+func (app *EnokiApp) GetStoreKeys() []storetypes.StoreKey {
 	keys := make([]storetypes.StoreKey, 0, len(app.keys))
 	for _, key := range app.keys {
 		keys = append(keys, key)
@@ -1214,33 +1217,33 @@ func (app *ChainApp) GetStoreKeys() []storetypes.StoreKey {
 // GetTKey returns the TransientStoreKey for the provided store key.
 //
 // NOTE: This is solely to be used for testing purposes.
-func (app *ChainApp) GetTKey(storeKey string) *storetypes.TransientStoreKey {
+func (app *EnokiApp) GetTKey(storeKey string) *storetypes.TransientStoreKey {
 	return app.tkeys[storeKey]
 }
 
 // GetMemKey returns the MemStoreKey for the provided mem key.
 //
 // NOTE: This is solely used for testing purposes.
-func (app *ChainApp) GetMemKey(storeKey string) *storetypes.MemoryStoreKey {
+func (app *EnokiApp) GetMemKey(storeKey string) *storetypes.MemoryStoreKey {
 	return app.memKeys[storeKey]
 }
 
 // GetSubspace returns a param subspace for a given module name.
 //
 // NOTE: This is solely to be used for testing purposes.
-func (app *ChainApp) GetSubspace(moduleName string) paramstypes.Subspace {
+func (app *EnokiApp) GetSubspace(moduleName string) paramstypes.Subspace {
 	subspace, _ := app.ParamsKeeper.GetSubspace(moduleName)
 	return subspace
 }
 
 // SimulationManager implements the SimulationApp interface
-func (app *ChainApp) SimulationManager() *module.SimulationManager {
+func (app *EnokiApp) SimulationManager() *module.SimulationManager {
 	return app.sm
 }
 
 // RegisterAPIRoutes registers all application module routes with the provided
 // API server.
-func (app *ChainApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
+func (app *EnokiApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
 	clientCtx := apiSvr.ClientCtx
 	// Register new tx routes from grpc-gateway.
 	authtx.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
@@ -1261,12 +1264,12 @@ func (app *ChainApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIC
 }
 
 // RegisterTxService implements the Application.RegisterTxService method.
-func (app *ChainApp) RegisterTxService(clientCtx client.Context) {
+func (app *EnokiApp) RegisterTxService(clientCtx client.Context) {
 	authtx.RegisterTxService(app.BaseApp.GRPCQueryRouter(), clientCtx, app.BaseApp.Simulate, app.interfaceRegistry)
 }
 
 // RegisterTendermintService implements the Application.RegisterTendermintService method.
-func (app *ChainApp) RegisterTendermintService(clientCtx client.Context) {
+func (app *EnokiApp) RegisterTendermintService(clientCtx client.Context) {
 	cmtApp := server.NewCometABCIWrapper(app)
 	cmtservice.RegisterTendermintService(
 		clientCtx,
@@ -1276,7 +1279,7 @@ func (app *ChainApp) RegisterTendermintService(clientCtx client.Context) {
 	)
 }
 
-func (app *ChainApp) RegisterNodeService(clientCtx client.Context, cfg config.Config) {
+func (app *EnokiApp) RegisterNodeService(clientCtx client.Context, cfg config.Config) {
 	nodeservice.RegisterNodeService(clientCtx, app.GRPCQueryRouter(), cfg)
 }
 

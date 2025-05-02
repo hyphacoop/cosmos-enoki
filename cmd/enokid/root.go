@@ -19,8 +19,8 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
-	"github.com/rollchains/enoki/app"
-	"github.com/rollchains/enoki/app/params"
+	"github.com/hyphacoop/cosmos-enoki/app"
+	"github.com/hyphacoop/cosmos-enoki/app/params"
 )
 
 // NewRootCmd creates a new root command for chain app. It is called once in the
@@ -28,7 +28,7 @@ import (
 func NewRootCmd() *cobra.Command {
 	// we "pre"-instantiate the application for getting the injected/configured encoding configuration
 	// note, this is not necessary when using app wiring, as depinject can be directly used (see root_v2.go)
-	tempApp := app.NewChainApp(
+	tempApp := app.NewEnokiApp(
 		log.NewNopLogger(), dbm.NewMemDB(), nil, false, simtestutil.NewAppOptionsWithFlagHome(tempDir()),
 		[]wasmkeeper.Option{},
 	)

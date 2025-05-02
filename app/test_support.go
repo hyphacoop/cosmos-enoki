@@ -11,7 +11,7 @@ import (
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 )
 
-func (app *ChainApp) GetIBCKeeper() *ibckeeper.Keeper {
+func (app *EnokiApp) GetIBCKeeper() *ibckeeper.Keeper {
 	return app.IBCKeeper
 }
 
@@ -19,22 +19,22 @@ func (app *ChainApp) GetIBCKeeper() *ibckeeper.Keeper {
 // 	return app.ScopedIBCKeeper
 // }
 
-func (app *ChainApp) GetBaseApp() *baseapp.BaseApp {
+func (app *EnokiApp) GetBaseApp() *baseapp.BaseApp {
 	return app.BaseApp
 }
 
-func (app *ChainApp) GetBankKeeper() bankkeeper.Keeper {
+func (app *EnokiApp) GetBankKeeper() bankkeeper.Keeper {
 	return app.BankKeeper
 }
 
-func (app *ChainApp) GetStakingKeeper() *stakingkeeper.Keeper {
+func (app *EnokiApp) GetStakingKeeper() *stakingkeeper.Keeper {
 	return app.StakingKeeper
 }
 
-func (app *ChainApp) GetAccountKeeper() authkeeper.AccountKeeper {
+func (app *EnokiApp) GetAccountKeeper() authkeeper.AccountKeeper {
 	return app.AccountKeeper
 }
 
-func (app *ChainApp) GetWasmKeeper() wasmkeeper.Keeper {
+func (app *EnokiApp) GetWasmKeeper() wasmkeeper.Keeper {
 	return app.WasmKeeper
 }

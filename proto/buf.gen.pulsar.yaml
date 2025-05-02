@@ -2,7 +2,7 @@ version: v1
 managed:
   enabled: true
   go_package_prefix:
-    default: github.com/rollchains/enoki/api
+    default: github.com/hyphacoop/cosmos-enoki/api
     except:
       - buf.build/googleapis/googleapis
       - buf.build/cosmos/gogo-proto

@@ -10,7 +10,7 @@ SIMAPP = ./app
 
 # for dockerized protobuf tools
 DOCKER := $(shell which docker)
-HTTPS_GIT := github.com/rollchains/enoki.git
+HTTPS_GIT := github.com/hyphacoop/cosmos-enoki.git
 
 export GO111MODULE = on
 
@@ -93,6 +93,7 @@ ifeq ($(OS),Windows_NT)
 	exit 1
 else
 	go build -mod=readonly $(BUILD_FLAGS) -o build/enokid ./cmd/enokid
+	# go build $(BUILD_FLAGS) -o build/enokid ./cmd/enokid
 endif
 
 build-windows-client: go.sum
@@ -107,6 +108,7 @@ endif
 
 install: go.sum
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/enokid
+	# go install $(BUILD_FLAGS) ./cmd/enokid
 
 ########################################
 ### Tools & dependencies

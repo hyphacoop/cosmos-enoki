@@ -2,7 +2,7 @@
 
 set -e
 
-GO_MOD_PACKAGE="github.com/rollchains/enoki"
+GO_MOD_PACKAGE="github.com/hyphacoop/cosmos-enoki"
 
 echo "Generating gogo proto code"
 cd proto

@@ -15,7 +15,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
-	"github.com/rollchains/enoki/app/params"
+	"github.com/hyphacoop/cosmos-enoki/app/params"
 )
 
 // MakeEncodingConfig creates a new EncodingConfig with all modules registered. For testing only
@@ -23,7 +23,7 @@ func MakeEncodingConfig(t testing.TB) params.EncodingConfig {
 	t.Helper()
 	// we "pre"-instantiate the application for getting the injected/configured encoding configuration
 	// note, this is not necessary when using app wiring, as depinject can be directly used (see root_v2.go)
-	tempApp := NewChainApp(
+	tempApp := NewEnokiApp(
 		log.NewNopLogger(),
 		dbm.NewMemDB(),
 		nil,
@@ -34,7 +34,7 @@ func MakeEncodingConfig(t testing.TB) params.EncodingConfig {
 	return makeEncodingConfig(tempApp)
 }
 
-func makeEncodingConfig(tempApp *ChainApp) params.EncodingConfig {
+func makeEncodingConfig(tempApp *EnokiApp) params.EncodingConfig {
 	encodingConfig := params.EncodingConfig{
 		InterfaceRegistry: tempApp.InterfaceRegistry(),
 		Codec:             tempApp.AppCodec(),

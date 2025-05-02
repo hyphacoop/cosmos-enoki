@@ -7,8 +7,8 @@ import (
 
 	cmtcfg "github.com/cometbft/cometbft/config"
 	dbm "github.com/cosmos/cosmos-db"
+	"github.com/hyphacoop/cosmos-enoki/app"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/rollchains/enoki/app"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -95,7 +95,7 @@ func initAppConfig() (string, interface{}) {
 
 func initRootCmd(
 	rootCmd *cobra.Command,
-	chainApp *app.ChainApp,
+	chainApp *app.EnokiApp,
 ) {
 	cfg := sdk.GetConfig()
 	cfg.Seal()
@@ -202,7 +202,7 @@ func newApp(
 		wasmOpts = append(wasmOpts, wasmkeeper.WithVMCacheMetrics(prometheus.DefaultRegisterer))
 	}
 
-	return app.NewChainApp(
+	return app.NewEnokiApp(
 		logger, db, traceStore, true,
 		appOpts,
 		wasmOpts,
@@ -221,7 +221,7 @@ func appExport(
 	appOpts servertypes.AppOptions,
 	modulesToExport []string,
 ) (servertypes.ExportedApp, error) {
-	var chainApp *app.ChainApp
+	var enokiApp *app.EnokiApp
 	// this check is necessary as we use the flag in x/upgrade.
 	// we can exit more gracefully by checking the flag here.
 	homePath, ok := appOpts.Get(flags.FlagHome).(string)
@@ -238,7 +238,7 @@ func appExport(
 	viperAppOpts.Set(server.FlagInvCheckPeriod, 1)
 	appOpts = viperAppOpts
 
-	chainApp = app.NewChainApp(
+	enokiApp = app.NewEnokiApp(
 		logger,
 		db,
 		traceStore,
@@ -248,12 +248,12 @@ func appExport(
 	)
 
 	if height != -1 {
-		if err := chainApp.LoadHeight(height); err != nil {
+		if err := enokiApp.LoadHeight(height); err != nil {
 			return servertypes.ExportedApp{}, err
 		}
 	}
 
-	return chainApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)
+	return enokiApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)
 }
 
 var tempDir = func() string {

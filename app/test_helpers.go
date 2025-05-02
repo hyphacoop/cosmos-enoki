@@ -62,7 +62,7 @@ func setup(
 	withGenesis bool,
 	invCheckPeriod uint,
 	wasmOpts ...wasmkeeper.Option,
-) (*ChainApp, GenesisState) {
+) (*EnokiApp, GenesisState) {
 	db := dbm.NewMemDB()
 	nodeHome := t.TempDir()
 	snapshotDir := filepath.Join(nodeHome, "data", "snapshots")
@@ -76,7 +76,7 @@ func setup(
 	appOptions := make(simtestutil.AppOptionsMap, 0)
 	appOptions[flags.FlagHome] = nodeHome // ensure unique folder
 	appOptions[server.FlagInvCheckPeriod] = invCheckPeriod
-	app := NewChainApp(
+	app := NewEnokiApp(
 		log.NewNopLogger(),
 		db,
 		nil,
@@ -93,7 +93,7 @@ func setup(
 }
 
 // NewChainAppWithCustomOptions initializes a new ChainApp with custom options.
-func NewChainAppWithCustomOptions(t *testing.T, isCheckTx bool, options SetupOptions) *ChainApp {
+func NewChainAppWithCustomOptions(t *testing.T, isCheckTx bool, options SetupOptions) *EnokiApp {
 	t.Helper()
 
 	privVal := mock.NewPV()
@@ -111,7 +111,7 @@ func NewChainAppWithCustomOptions(t *testing.T, isCheckTx bool, options SetupOpt
 		Coins:   sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, sdkmath.NewInt(100000000000000))),
 	}
 
-	app := NewChainApp(
+	app := NewEnokiApp(
 		options.Logger,
 		options.DB,
 		nil, true,
@@ -144,7 +144,7 @@ func NewChainAppWithCustomOptions(t *testing.T, isCheckTx bool, options SetupOpt
 func Setup(
 	t *testing.T,
 	wasmOpts ...wasmkeeper.Option,
-) *ChainApp {
+) *EnokiApp {
 	t.Helper()
 
 	privVal := mock.NewPV()
@@ -186,7 +186,7 @@ func SetupWithGenesisValSet(
 	chainID string,
 	wasmOpts []wasmkeeper.Option,
 	balances ...banktypes.Balance,
-) *ChainApp {
+) *EnokiApp {
 	t.Helper()
 
 	app, genesisState := setup(
@@ -223,14 +223,14 @@ func SetupWithGenesisValSet(
 }
 
 // SetupWithEmptyStore set up a chain app instance with empty DB
-func SetupWithEmptyStore(t testing.TB) *ChainApp {
+func SetupWithEmptyStore(t testing.TB) *EnokiApp {
 	app, _ := setup(t, "testing", false, 0)
 	return app
 }
 
 // GenesisStateWithSingleValidator initializes GenesisState with a single validator and genesis accounts
 // that also act as delegators.
-func GenesisStateWithSingleValidator(t *testing.T, app *ChainApp) GenesisState {
+func GenesisStateWithSingleValidator(t *testing.T, app *EnokiApp) GenesisState {
 	t.Helper()
 
 	privVal := mock.NewPV()
@@ -260,11 +260,11 @@ func GenesisStateWithSingleValidator(t *testing.T, app *ChainApp) GenesisState {
 
 // AddTestAddrsIncremental constructs and returns accNum amount of accounts with an
 // initial balance of accAmt in random order
-func AddTestAddrsIncremental(app *ChainApp, ctx sdk.Context, accNum int, accAmt sdkmath.Int) []sdk.AccAddress {
+func AddTestAddrsIncremental(app *EnokiApp, ctx sdk.Context, accNum int, accAmt sdkmath.Int) []sdk.AccAddress {
 	return addTestAddrs(app, ctx, accNum, accAmt, simtestutil.CreateIncrementalAccounts)
 }
 
-func addTestAddrs(app *ChainApp, ctx sdk.Context, accNum int, accAmt sdkmath.Int, strategy simtestutil.GenerateAccountStrategy) []sdk.AccAddress {
+func addTestAddrs(app *EnokiApp, ctx sdk.Context, accNum int, accAmt sdkmath.Int, strategy simtestutil.GenerateAccountStrategy) []sdk.AccAddress {
 	testAddrs := strategy(accNum)
 	bondDenom, err := app.StakingKeeper.BondDenom(ctx)
 	if err != nil {
@@ -280,7 +280,7 @@ func addTestAddrs(app *ChainApp, ctx sdk.Context, accNum int, accAmt sdkmath.Int
 	return testAddrs
 }
 
-func initAccountWithCoins(app *ChainApp, ctx sdk.Context, addr sdk.AccAddress, coins sdk.Coins) {
+func initAccountWithCoins(app *EnokiApp, ctx sdk.Context, addr sdk.AccAddress, coins sdk.Coins) {
 	err := app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, coins)
 	if err != nil {
 		panic(err)
@@ -302,11 +302,11 @@ func NewTestNetworkFixture() network.TestFixture {
 	}
 	defer os.RemoveAll(dir)
 
-	app := NewChainApp(log.NewNopLogger(), dbm.NewMemDB(), nil, true, simtestutil.NewAppOptionsWithFlagHome(dir),
+	app := NewEnokiApp(log.NewNopLogger(), dbm.NewMemDB(), nil, true, simtestutil.NewAppOptionsWithFlagHome(dir),
 		nil,
 	)
 	appCtr := func(val network.ValidatorI) servertypes.Application {
-		return NewChainApp(
+		return NewEnokiApp(
 			val.GetCtx().Logger, dbm.NewMemDB(), nil, true,
 			simtestutil.NewAppOptionsWithFlagHome(val.GetCtx().Config.RootDir),
 			emptyWasmOptions,

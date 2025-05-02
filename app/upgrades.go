@@ -5,15 +5,15 @@ import (
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 
-	"github.com/rollchains/enoki/app/upgrades"
-	"github.com/rollchains/enoki/app/upgrades/noop"
+	"github.com/hyphacoop/cosmos-enoki/app/upgrades"
+	"github.com/hyphacoop/cosmos-enoki/app/upgrades/noop"
 )
 
 // Upgrades list of chain upgrades
 var Upgrades = []upgrades.Upgrade{}
 
 // RegisterUpgradeHandlers registers the chain upgrade handlers
-func (app *ChainApp) RegisterUpgradeHandlers() {
+func (app *EnokiApp) RegisterUpgradeHandlers() {
 	// setupLegacyKeyTables(&app.ParamsKeeper)
 	if len(Upgrades) == 0 {
 		// always have a unique upgrade registered for the current version to test in system tests
