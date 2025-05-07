@@ -9,8 +9,8 @@ BINDIR ?= $(GOPATH)/bin
 SIMAPP = ./app
 
 # for dockerized protobuf tools
-DOCKER := $(shell which docker)
-HTTPS_GIT := github.com/hyphacoop/cosmos-enoki.git
+# DOCKER := $(shell which docker)
+# HTTPS_GIT := github.com/hyphacoop/cosmos-enoki.git
 
 export GO111MODULE = on
 
@@ -99,19 +99,12 @@ else
 	# go build $(BUILD_FLAGS) -o build/enokid ./cmd/enokid
 endif
 
-build-windows-client: go.sum
-	GOOS=windows GOARCH=amd64 go build -mod=readonly $(BUILD_FLAGS) -o build/enokid.exe ./cmd/enokid
-
-build-contract-tests-hooks:
-ifeq ($(OS),Windows_NT)
-	go build -mod=readonly $(BUILD_FLAGS) -o build/contract_tests.exe ./cmd/contract_tests
-else
-	go build -mod=readonly $(BUILD_FLAGS) -o build/contract_tests ./cmd/contract_tests
-endif
-
 install: go.sum
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/enokid
 	# go install $(BUILD_FLAGS) ./cmd/enokid
+
+local-image:
+	docker build -t enoki:local .
 
 ########################################
 ### Tools & dependencies
@@ -139,7 +132,7 @@ distclean: clean
 ### Testing
 
 test: test-unit
-test-all: test-race test-cover test-system
+test-all: test-race test-cover
 
 test-unit:
 	@VERSION=$(VERSION) go test -mod=readonly -tags='ledger test_ledger_mock' ./...
@@ -152,21 +145,6 @@ test-cover:
 
 benchmark:
 	@go test -mod=readonly -bench=. ./...
-
-test-sim-import-export: runsim
-	@echo "Running application import/export simulation. This may take several minutes..."
-	@$(BINDIR)/runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 5 TestAppImportExport
-
-test-sim-multi-seed-short: runsim
-	@echo "Running short multi-seed application simulation. This may take awhile!"
-	@$(BINDIR)/runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 5 TestFullAppSimulation
-
-test-sim-deterministic: runsim
-	@echo "Running application deterministic simulation. This may take awhile!"
-	@$(BINDIR)/runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 1 1 TestAppStateDeterminism
-
-test-system: install
-	$(MAKE) -C tests/system/ test
 
 ###############################################################################
 ###                                Linting                                  ###
@@ -192,75 +170,6 @@ mod-tidy:
 
 .PHONY: format-tools lint format mod-tidy
 
-
-###############################################################################
-###                                Protobuf                                 ###
-###############################################################################
-CURRENT_UID := $(shell id -u)
-CURRENT_GID := $(shell id -g)
-
-protoVer=0.13.2
-protoImageName=ghcr.io/cosmos/proto-builder:$(protoVer)
-protoImage="$(DOCKER)" run -e BUF_CACHE_DIR=/tmp/buf --rm -v "$(CURDIR)":/workspace:rw --user ${CURRENT_UID}:${CURRENT_GID} --workdir /workspace $(protoImageName)
-
-proto-all: proto-format proto-lint proto-gen format
-
-proto-gen:
-	@go install cosmossdk.io/orm/cmd/protoc-gen-go-cosmos-orm@v1.0.0-beta.3
-	@echo "Generating Protobuf files"
-	@$(protoImage) sh ./scripts/protocgen.sh
-# generate the stubs for the proto files from the proto directory
-	@spawn stub-gen
-	@go mod tidy
-
-proto-format:
-	@echo "Formatting Protobuf files"
-	@$(protoImage) find ./ -name "*.proto" -exec clang-format -i {} \;
-
-proto-swagger-gen:
-	@./scripts/protoc-swagger-gen.sh
-
-proto-lint:
-	@$(protoImage) buf lint --error-format=json
-
-proto-check-breaking:
-	@$(protoImage) buf breaking --against $(HTTPS_GIT)#branch=main
-
-.PHONY: all install install-debug \
-	go-mod-cache draw-deps clean build format \
-	test test-all test-build test-cover test-unit test-race \
-	test-sim-import-export build-windows-client \
-	test-system
-
-## --- Testnet Utilities ---
-get-localic:
-	@echo "Installing local-interchain"
-	git clone --depth 1 --branch v8.7.0 https://github.com/strangelove-ventures/interchaintest.git interchaintest-downloader
-	cd interchaintest-downloader/local-interchain && make install
-	@sleep 0.1
-	@echo ✅ local-interchain installed $(shell which local-ic)
-
-is-localic-installed:
-ifeq (,$(shell which local-ic))
-	make get-localic
-endif
-
-get-heighliner:
-	@echo ⏳ Installing heighliner...
-	git clone --depth 1 https://github.com/strangelove-ventures/heighliner.git
-	cd heighliner && go install
-	@sleep 0.1
-	@echo ✅ heighliner installed to $(shell which heighliner)
-
-local-image:
-ifeq (,$(shell which heighliner))
-	echo 'heighliner' binary not found. Consider running `make get-heighliner`
-else
-	heighliner build -c enoki --local -f chains.yaml
-endif
-
-.PHONY: get-heighliner local-image is-localic-installed
-
 ###############################################################################
 ###                                     e2e                                 ###
 ###############################################################################
@@ -281,10 +190,6 @@ ictest-packetforward:
 	@echo "Running packet forward middleware e2e test"
 	@cd interchaintest && go test -race -v -run TestPacketForwardMiddleware .
 
-ictest-poa:
-	@echo "Running proof of authority e2e test"
-	@cd interchaintest && go test -race -v -run TestPOA .
-
 ictest-tokenfactory:
 	@echo "Running token factory e2e test"
 	@cd interchaintest && go test -race -v -run TestTokenFactory .
@@ -293,44 +198,54 @@ ictest-ratelimit:
 	@echo "Running rate limit e2e test"
 	@cd interchaintest && go test -race -v -run TestIBCRateLimit .
 
+ictest-full: ictest-basic ictest-ibc ictest-wasm ictest-packetforward ictest-tokenfactory ictest-ratelimit
+
+
 ###############################################################################
-###                                    testnet                              ###
+###                              image testnet                              ###
 ###############################################################################
 
-setup-testnet: mod-tidy is-localic-installed install local-image set-testnet-configs setup-testnet-keys
 
-# Run this before testnet keys are added
-# This chain id is used in the testnet.json as well
-set-testnet-configs:
-	enokid config set client chain-id localchain-1
-	enokid config set client keyring-backend test
-	enokid config set client output text
+get-localic:
+	@echo "Installing local-interchain"
+	git clone --depth 1 --branch v8.7.0 https://github.com/strangelove-ventures/interchaintest.git interchaintest-downloader
+	cd interchaintest-downloader/local-interchain && make install
+	@sleep 0.1
+	@echo ✅ local-interchain installed $(shell which local-ic)
+	rm -rf interchaintest-downloader
 
-# import keys from testnet.json into test keyring
-setup-testnet-keys:
-	-`echo "decorate bright ozone fork gallery riot bus exhaust worth way bone indoor calm squirrel merry zero scheme cotton until shop any excess stage laundry" | enokid keys add acc0 --recover`
-	-`echo "wealth flavor believe regret funny network recall kiss grape useless pepper cram hint member few certain unveil rather brick bargain curious require crowd raise" | enokid keys add acc1 --recover`
+is-localic-installed:
+ifeq (,$(shell which local-ic))
+	make get-localic
+else
+	@echo ✅ local-interchain already installed $(shell which local-ic)
+endif
 
-testnet: setup-testnet
-	spawn local-ic start testnet
+setup-ic-testnet: mod-tidy is-localic-installed local-image
+
+ic-testnet: setup-ic-testnet
+	local-ic start standalone
+
+ic-testnet-ibc: setup-ic-testnet
+	local-ic start self-ibc
+
+ic-testnet-gaia: setup-ic-testnet
+	local-ic start ibc-gaia
+
+.PHONY: get-localic is-localic-installed setup-ic-testnet ic-testnet ic-testnet-ibc ic-testnet-gaia
+
+###############################################################################
+###                              shell testnet                              ###
+###############################################################################
 
 sh-testnet: mod-tidy
 	CHAIN_ID="test-enoki-1" BLOCK_TIME="2000ms" CLEAN=true sh scripts/test_node.sh
 
-.PHONY: setup-testnet set-testnet-configs testnet testnet-basic sh-testnet
+.PHONY: sh-testnet
 
 ###############################################################################
 ###                                     help                                ###
 ###############################################################################
-
-.PHONY: explorer
-explorer:
-	docker compose up
-
-.PHONY: generate-webapp
-generate-webapp:
-	sudo npm install --global create-cosmos-app
-	cca --name web -e spawn
 
 help:
 	@echo "Usage: make <target>"
@@ -338,11 +253,10 @@ help:
 	@echo "Available targets:"
 	@echo "  install             : Install the binary"
 	@echo "  local-image         : Install the docker image"
-	@echo "  proto-gen           : Generate code from proto files"
-	@echo "  testnet             : Local devnet with IBC"
+	@echo "  ic-testnet          : Local devnet"
+	@echo "  ic-testnet-ibc      : Local devnet with IBC channel to second Enoki devnet"
+	@echo "  ic-testnet-gaia     : Local devnet with IBC channel to Gaia devnet"
 	@echo "  sh-testnet          : Shell local devnet"
-	@echo "  ictest-basic        : Basic end-to-end test"
-	@echo "  ictest-ibc          : IBC end-to-end test"
-	@echo "  generate-webapp     : Create a new webapp template"
+	@echo "  ictest-full         : Run all e2e tests"
 
 .PHONY: help

@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/hyphacoop/cosmos-enoki/app"
+
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/hyphacoop/cosmos-enoki/app"
 )
 
 func main() {

@@ -6,6 +6,7 @@ import (
 	"os"
 
 	cmtcfg "github.com/cometbft/cometbft/config"
+	cmtcli "github.com/cometbft/cometbft/libs/cli"
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/hyphacoop/cosmos-enoki/app"
 	"github.com/prometheus/client_golang/prometheus"
@@ -16,7 +17,6 @@ import (
 	"cosmossdk.io/log"
 	confixcmd "cosmossdk.io/tools/confix/cmd"
 
-	cmtcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/debug"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -120,7 +120,6 @@ func initRootCmd(
 		queryCommand(),
 		txCommand(),
 	)
-
 }
 
 func addModuleInitFlags(startCmd *cobra.Command) {

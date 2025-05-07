@@ -3,9 +3,10 @@ package decorators
 import (
 	"fmt"
 
+	"github.com/cosmos/gogoproto/proto"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/authz"
-	"github.com/cosmos/gogoproto/proto"
 )
 
 // MsgFilterDecorator is an ante.go decorator template for filtering messages.

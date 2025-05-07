@@ -4,13 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"cosmossdk.io/math"
-
 	"github.com/strangelove-ventures/interchaintest/v8"
 	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v8/testreporter"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
+
+	"cosmossdk.io/math"
 )
 
 func TestBasicChain(t *testing.T) {
@@ -52,7 +52,5 @@ func TestBasicChain(t *testing.T) {
 		bal, err := chain.BankQueryBalance(ctx, user.FormattedAddress(), chain.Config().Denom)
 		require.NoError(t, err)
 		require.EqualValues(t, amt, bal)
-
 	})
-
 }

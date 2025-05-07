@@ -1,4 +1,3 @@
-# Info on how to use this docker image can be found in DOCKER_README.md
 ARG IMG_TAG=latest
 
 # Compile the enokid binary

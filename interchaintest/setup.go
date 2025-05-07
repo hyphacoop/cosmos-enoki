@@ -5,19 +5,20 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
+	ibcconntypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
 	"github.com/strangelove-ventures/interchaintest/v8"
 	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/strangelove-ventures/interchaintest/v8/testutil"
+	tokenfactory "github.com/strangelove-ventures/tokenfactory/x/tokenfactory/types"
 
 	sdkmath "cosmossdk.io/math"
+
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
 
 	wasm "github.com/CosmWasm/wasmd/x/wasm/types"
-	ibcconntypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
-	tokenfactory "github.com/strangelove-ventures/tokenfactory/x/tokenfactory/types"
 )
 
 var (
@@ -113,6 +114,7 @@ func ExecuteQuery(ctx context.Context, chain *cosmos.CosmosChain, cmd []string, 
 
 	ExecuteExec(ctx, chain, cmd, i, flags...)
 }
+
 func ExecuteExec(ctx context.Context, chain *cosmos.CosmosChain, cmd []string, i interface{}, extraFlags ...string) {
 	command := []string{chain.Config().Bin}
 	command = append(command, cmd...)

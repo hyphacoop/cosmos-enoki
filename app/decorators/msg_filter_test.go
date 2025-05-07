@@ -3,14 +3,14 @@ package decorators_test
 import (
 	"testing"
 
-	sdkmath "cosmossdk.io/math"
-
 	"github.com/cometbft/cometbft/crypto/secp256k1"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	"github.com/hyphacoop/cosmos-enoki/app/decorators"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/hyphacoop/cosmos-enoki/app/decorators"
+	sdkmath "cosmossdk.io/math"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
 type AnteTestSuite struct {

@@ -4,6 +4,8 @@ import (
 	"os"
 
 	dbm "github.com/cosmos/cosmos-db"
+	"github.com/hyphacoop/cosmos-enoki/app"
+	"github.com/hyphacoop/cosmos-enoki/app/params"
 	"github.com/spf13/cobra"
 
 	"cosmossdk.io/log"
@@ -19,8 +21,6 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
-	"github.com/hyphacoop/cosmos-enoki/app"
-	"github.com/hyphacoop/cosmos-enoki/app/params"
 )
 
 // NewRootCmd creates a new root command for chain app. It is called once in the

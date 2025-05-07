@@ -2,7 +2,7 @@
     "chains": [
         {
             "name": "enoki",
-            "chain_id": "localchain-1",
+            "chain_id": "test-enoki-1",
             "docker_image": {
                 "repository": "enoki",
                 "version": "local",

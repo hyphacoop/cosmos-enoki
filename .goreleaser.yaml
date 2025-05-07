@@ -9,10 +9,10 @@ release:
 # Only uncomment os, arch, and targets if you are NOT using cosmwasm / wasm-light-client.
 # Windows, 386 (32bit), and ARM are not Wasm compatible.
 builds:
-  - id: enoki
+  - id: enokid-linux-amd64
     goos:
       - linux
-      - darwin
+      # - darwin
       # - windows
     goarch:
       - amd64
@@ -68,45 +68,6 @@ source:
   format: tar.gz
 gomod:
   gobinary: go
-announce:
-  twitter:
-    message_template: '{{ .ProjectName }} {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'
-  mastodon:
-    message_template: '{{ .ProjectName }} {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'
-    server: ""
-  reddit:
-    title_template: '{{ .ProjectName }} {{ .Tag }} is out!'
-    url_template: '{{ .ReleaseURL }}'
-  slack:
-    message_template: '{{ .ProjectName }} {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'
-    username: GoReleaser
-  discord:
-    message_template: '{{ .ProjectName }} {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'
-    author: GoReleaser
-    color: "3888754"
-    icon_url: https://goreleaser.com/static/avatar.png
-  teams:
-    title_template: '{{ .ProjectName }} {{ .Tag }} is out!'
-    message_template: '{{ .ProjectName }} {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'
-    color: '#2D313E'
-    icon_url: https://goreleaser.com/static/avatar.png
-  smtp:
-    subject_template: '{{ .ProjectName }} {{ .Tag }} is out!'
-    body_template: 'You can view details from: {{ .ReleaseURL }}'
-  mattermost:
-    message_template: '{{ .ProjectName }} {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'
-    title_template: '{{ .ProjectName }} {{ .Tag }} is out!'
-    username: GoReleaser
-  linkedin:
-    message_template: '{{ .ProjectName }} {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'
-  telegram:
-    message_template: '{{ .ProjectName }} {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'
-  webhook:
-    message_template: '{ "message": "{{ .ProjectName }} {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}"}'
-    content_type: application/json; charset=utf-8
-  opencollective:
-    title_template: '{{ .Tag }}'
-    message_template: '{{ .ProjectName }} {{ .Tag }} is out!<br/>Check it out at <a href="{{ .ReleaseURL }}">{{ .ReleaseURL }}</a>'
 git:
   tag_sort: -version:refname
 github_urls:
