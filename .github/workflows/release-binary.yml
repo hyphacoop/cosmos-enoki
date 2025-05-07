@@ -36,8 +36,8 @@ jobs:
       - name: Build
         uses: goreleaser/goreleaser-action@v6
         with:
-          version: latest
-          args: build --skip-validate
+          version: "~> v2"
+          args: build --skip validate
 
       # - name: Release
       #   uses: goreleaser/goreleaser-action@v5
