@@ -6,7 +6,7 @@ release:
   github:
     owner: hyphacoop
     name: enoki
-  name_template: '{{.Tag}}'
+  # name_template: '{{.Tag}}'
 
 env:
   - GO111MODULE=on
