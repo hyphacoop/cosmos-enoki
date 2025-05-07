@@ -5,7 +5,7 @@ project_name: enoki
 release:
   github:
     owner: hyphacoop
-    name: enoki
+    name: cosmos-enoki
   # name_template: '{{.Tag}}'
 
 env:
