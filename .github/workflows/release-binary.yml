@@ -39,21 +39,26 @@ jobs:
 
       - name: Release with goreleaser container
         run: |
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
+          echo "TM_VERSION=${{ env.TM_VERSION }}"
+          echo "COSMWASM_VERSION=${{ env.COSMWASM_VERSION }}"
+          echo "GORELEASER_IMAGE=${{ env.GORELEASER_IMAGE }}"
+          docker pull ${{ env.GORELEASER_IMAGE }}
           docker run \
           --rm \
           -e CGO_ENABLED=1 \
-          -e GITHUB_TOKEN=$(GITHUB_TOKEN) \
-          -e TM_VERSION=$(TM_VERSION) \
-          -e COSMWASM_VERSION=$(COSMWASM_VERSION) \
+          -e GITHUB_TOKEN=${{ env.GITHUB_TOKEN }} \
+          -e TM_VERSION=${{ env.TM_VERSION }} \
+          -e COSMWASM_VERSION=${{ env.COSMWASM_VERSION }} \
           -v `pwd`:/go/src/enokid \
           -w /go/src/enokid \
-          $(GORELEASER_IMAGE) \
+          ${{ env.GORELEASER_IMAGE }} \
           release \
           --timeout=90m \
           --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GORELEASER_IMAGE: ghcr.io/goreleaser/goreleaser-cross:v1.23
+          GORELEASER_IMAGE: "ghcr.io/goreleaser/goreleaser-cross:v1.23"
 
       # - name: Install osxcross
       #   run: |
