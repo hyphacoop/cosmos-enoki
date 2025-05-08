@@ -23,7 +23,7 @@ builds:
       pre:
         - sudo wget https://github.com/CosmWasm/wasmvm/releases/download/{{ .Env.COSMWASM_VERSION }}/libwasmvmstatic_darwin.a -O /lib/libwasmvmstatic_darwin.a
     env:
-      - CC=oa64-clang
+      - CC=o64-clang
       - CGO_LDFLAGS=-L/lib
     goos:
       - darwin
@@ -62,7 +62,7 @@ builds:
       pre:
         - sudo wget https://github.com/CosmWasm/wasmvm/releases/download/{{ .Env.COSMWASM_VERSION }}/libwasmvmstatic_darwin.a -O /lib/libwasmvmstatic_darwin.a
     env:
-      - CC=oa64-clang
+      - CC=o64-clang
       - CGO_LDFLAGS=-L/lib
     tags:
       - netgo
