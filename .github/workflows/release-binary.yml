@@ -41,8 +41,8 @@ jobs:
       - name: Set goreleaser environment variables
         run: |
           echo "GORELEASER_IMAGE=ghcr.io/goreleaser/goreleaser-cross:v${{ env.REQUIRE_GO_VERSION }}" >> $GITHUB_ENV
-          echo "TM_VERSION=$(shell go list -m github.com/cometbft/cometbft | sed 's:.* ::')" >> $GITHUB_ENV
-          echo "COSMWASM_VERSION=$(shell go list -m github.com/CosmWasm/wasmvm/v2 | sed 's/.* //')" >> $GITHUB_ENV
+          echo "TM_VERSION=$(go list -m github.com/cometbft/cometbft | sed 's:.* ::')" >> $GITHUB_ENV
+          echo "COSMWASM_VERSION=$(go list -m github.com/CosmWasm/wasmvm/v2 | sed 's/.* //')" >> $GITHUB_ENV
       - name: Release with goreleaser container
         run: |
           echo "GORELEASER_IMAGE=${{ env.GORELEASER_IMAGE }}"
