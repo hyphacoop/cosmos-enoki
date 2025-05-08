@@ -33,17 +33,29 @@ jobs:
       - name: Clean up dist directory
         run: rm -rf dist
 
-      - name: Build
-        uses: goreleaser/goreleaser-action@v6
-        with:
-          version: "~> v2"
-          args: build --skip validate --snapshot
+      - name: Install osxcross
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang llvm build-essential
+          git clone https://github.com/tpoechtrager/osxcross.git
+          cd osxcross
+          wget -O tarballs/MacOSX11.3.sdk.tar.xz https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX11.3.sdk.tar.xz
+          UNATTENDED=yes ./build.sh
+          echo "Check osxcross"
+          which oa64-clang
+          which o64-clang
 
-      - name: Release
-        uses: goreleaser/goreleaser-action@v6
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          version: "~> v2"
-          args: release --skip validate --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Build
+      #   uses: goreleaser/goreleaser-action@v6
+      #   with:
+      #     version: "~> v2"
+      #     args: build --skip validate --snapshot
+
+      # - name: Release
+      #   uses: goreleaser/goreleaser-action@v6
+      #   if: startsWith(github.ref, 'refs/tags/')
+      #   with:
+      #     version: "~> v2"
+      #     args: release --skip validate --clean
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
