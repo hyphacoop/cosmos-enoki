@@ -154,3 +154,5 @@ github_urls:
   download: https://github.com
 gitlab_urls:
   download: https://gitlab.com
+changelog:
+  disable: true
