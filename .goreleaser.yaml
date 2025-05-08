@@ -10,6 +10,7 @@ release:
 
 env:
   - GO111MODULE=on
+  - CGO_ENABLED=1
   
 # Only uncomment os, arch, and targets if you are NOT using cosmwasm / wasm-light-client.
 # Windows, 386 (32bit), and ARM are not Wasm compatible.
@@ -82,13 +83,13 @@ builds:
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
       - -X github.com/cosmos/cosmos-sdk/version.BuildTags=netgo,ledger,static_wasm
       - -X github.com/cometbft/cometbft/version.TMCoreSemVer={{ .Env.TM_VERSION }}
+
   - id: enokid-linux-amd64
     main: ./cmd/enokid
     binary: enokid
     builder: go
     tool: "go"
     env:
-      - CGO_ENABLED=1
       - CC=/opt/musl-cross/bin/x86_64-linux-musl-gcc
       - LD=/opt/musl-cross/bin/x86_64-linux-musl-ld
       - CGO_LDFLAGS=-L/lib
