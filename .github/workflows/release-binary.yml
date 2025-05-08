@@ -37,6 +37,23 @@ jobs:
         run: |
           docker --version
 
+      - name: Release with goreleaser container
+        run: |
+          docker run \
+          --rm \
+          -e CGO_ENABLED=1 \
+          -e GITHUB_TOKEN=$(GITHUB_TOKEN) \
+          -e TM_VERSION=$(TM_VERSION) \
+          -e COSMWASM_VERSION=$(COSMWASM_VERSION) \
+          -v `pwd`:/go/src/enokid \
+          -w /go/src/enokid \
+          $(GORELEASER_IMAGE) \
+          release \
+          --timeout=90m \
+          --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Install osxcross
         run: |
           sudo apt-get update
@@ -49,6 +66,13 @@ jobs:
           ls ./target/bin
           # which oa64-clang
           # which o64-clang
+          export PATH=$PATH:$(pwd)/target/bin
+
+      - name: Debug osxcross
+        run: |
+          echo $PATH
+          which o64-clang
+          o64-clang --version
 
       # - name: Build
       #   uses: goreleaser/goreleaser-action@v6
