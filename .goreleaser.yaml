@@ -20,7 +20,7 @@ builds:
     mod_timestamp: "{{ .CommitTimestamp }}"
     hooks:
       pre:
-        - wget https://github.com/CosmWasm/wasmvm/releases/download/{{ .Env.COSMWASM_VERSION }}/libwasmvmstatic_darwin.a -O /lib/libwasmvmstatic_darwin.a
+        - sudo wget https://github.com/CosmWasm/wasmvm/releases/download/{{ .Env.COSMWASM_VERSION }}/libwasmvmstatic_darwin.a -O /lib/libwasmvmstatic_darwin.a
     env:
       - CC=oa64-clang
       - CGO_LDFLAGS=-L/lib
@@ -59,7 +59,7 @@ builds:
     mod_timestamp: "{{ .CommitTimestamp }}"
     hooks:
       pre:
-        - wget https://github.com/CosmWasm/wasmvm/releases/download/{{ .Env.COSMWASM_VERSION }}/libwasmvmstatic_darwin.a -O /lib/libwasmvmstatic_darwin.a
+        - sudo wget https://github.com/CosmWasm/wasmvm/releases/download/{{ .Env.COSMWASM_VERSION }}/libwasmvmstatic_darwin.a -O /lib/libwasmvmstatic_darwin.a
     env:
       - CC=oa64-clang
       - CGO_LDFLAGS=-L/lib
@@ -86,7 +86,7 @@ builds:
     main: ./cmd/enokid
     binary: enokid
     builder: go
-    gobinary: "go"
+    tool: "go1.23.8"
     env:
       - CGO_ENABLED=1
       - CC=/opt/musl-cross/bin/x86_64-linux-musl-gcc
@@ -124,7 +124,7 @@ builds:
 archives:
   - id: default
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
-    format: tar.gz
+    formats: [ 'tar.gz' ]
     files:
       - src: license*
       - src: LICENSE*
