@@ -16,8 +16,9 @@ jobs:
   release-binary:
     env:
       VERSION: v0.0.1
-      COSMWASM_VERSION: v2.2.3
-      TM_VERSION: v0.38.17
+      # COSMWASM_VERSION: v2.2.3
+      # TM_VERSION: v0.38.17
+      REQUIRE_GO_VERSION: 1.23
     permissions: write-all
     runs-on: ubuntu-latest
     steps:
@@ -37,12 +38,16 @@ jobs:
         run: |
           docker --version
 
+      - name: Set goreleaser environment variables
+        run: |
+          echo "GORELEASER_IMAGE=ghcr.io/goreleaser/goreleaser-cross:v${{ env.REQUIRE_GO_VERSION }}" >> $GITHUB_ENV
+          echo "TM_VERSION=$(shell go list -m github.com/cometbft/cometbft | sed 's:.* ::')" >> $GITHUB_ENV
+          echo "COSMWASM_VERSION=$(shell go list -m github.com/CosmWasm/wasmvm/v2 | sed 's/.* //')" >> $GITHUB_ENV
       - name: Release with goreleaser container
         run: |
-          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
+          echo "GORELEASER_IMAGE=${{ env.GORELEASER_IMAGE }}"
           echo "TM_VERSION=${{ env.TM_VERSION }}"
           echo "COSMWASM_VERSION=${{ env.COSMWASM_VERSION }}"
-          echo "GORELEASER_IMAGE=${{ env.GORELEASER_IMAGE }}"
           docker pull ${{ env.GORELEASER_IMAGE }}
           docker run \
           --rm \
@@ -58,7 +63,7 @@ jobs:
           --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GORELEASER_IMAGE: "ghcr.io/goreleaser/goreleaser-cross:v1.23"
+          # GORELEASER_IMAGE: "ghcr.io/goreleaser/goreleaser-cross:v1.23"
 
       # - name: Install osxcross
       #   run: |

@@ -124,7 +124,7 @@ builds:
 
 archives:
   - id: default
-    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
+    name_template: '{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
     formats: [ 'tar.gz' ]
     files:
       - src: license*
@@ -136,7 +136,7 @@ archives:
 snapshot:
   version_template: '{{ .Version }}-SNAPSHOT-{{ .ShortCommit }}'
 checksum:
-  name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
+  name_template: '{{ .ProjectName }}_v{{ .Version }}_checksums.txt'
   algorithm: sha256
 dist: dist
 env_files:
