@@ -42,7 +42,7 @@ jobs:
           wget -O tarballs/MacOSX11.3.sdk.tar.xz https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX11.3.sdk.tar.xz
           UNATTENDED=yes ./build.sh
           echo "Check osxcross"
-          which oa64-clang
+          # which oa64-clang
           which o64-clang
 
       # - name: Build
