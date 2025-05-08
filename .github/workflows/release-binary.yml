@@ -36,7 +36,6 @@ jobs:
       - name: Check docker
         run: |
           docker --version
-          docker-compose --version
 
       - name: Install osxcross
         run: |
