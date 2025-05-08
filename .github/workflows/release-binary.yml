@@ -66,11 +66,13 @@ jobs:
           ls ./target/bin
           # which oa64-clang
           # which o64-clang
-          export PATH=$PATH:$(pwd)/target/bin
+          # export PATH=$PATH:$(pwd)/target/bin
+          echo "$(pwd)/target/bin" >> $GITHUB_PATH
 
       - name: Debug osxcross
         run: |
           echo $PATH
+          echo $GITHUB_PATH
           which o64-clang
           o64-clang --version
 
