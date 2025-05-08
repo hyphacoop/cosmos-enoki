@@ -82,6 +82,7 @@ jobs:
       #     which o64-clang
       #     o64-clang --version
 
+      # Linux build needs sudo in goreleaser pre hooks
       # - name: Build
       #   uses: goreleaser/goreleaser-action@v6
       #   with:
