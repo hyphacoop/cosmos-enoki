@@ -33,6 +33,11 @@ jobs:
       - name: Clean up dist directory
         run: rm -rf dist
 
+      - name: Check docker
+        run: |
+          docker --version
+          docker-compose --version
+
       - name: Install osxcross
         run: |
           sudo apt-get update
