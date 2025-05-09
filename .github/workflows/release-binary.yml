@@ -15,7 +15,6 @@ on:
 jobs:
   release-binary:
     env:
-      # VERSION: v0.0.1
       REQUIRE_GO_VERSION: 1.23
     permissions: write-all
     runs-on: ubuntu-latest
