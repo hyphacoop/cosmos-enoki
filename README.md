@@ -32,6 +32,6 @@ Enoki is Hypha's reference binary for the Interchain stack.
   - Interchaintest testnet: single Enoki chain
 - `make ic-testnet-ibc`
   - Interchaintest testnet: Enoki chain 1 <--IBC--> Enoki chain 2
-- `make ic-testent-gaia`
+- `make ic-testnet-gaia`
   - Interchaintest testnet: Enoki chain <--IBC--> Gaia chain
 
