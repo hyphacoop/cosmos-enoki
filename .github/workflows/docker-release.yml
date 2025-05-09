@@ -73,4 +73,3 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
