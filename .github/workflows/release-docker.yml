@@ -46,7 +46,7 @@ jobs:
         id: tag
         run: |
           # v0.0.1
-          VERSION=$(echo ${{ github.ref_name }} | sed "s/v//")
+          VERSION=$(echo ${{ github.ref_name }})
           # 0.0.1
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
