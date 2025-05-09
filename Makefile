@@ -195,8 +195,13 @@ ictest-ratelimit:
 	@echo "Running rate limit e2e test"
 	@cd interchaintest && go test -race -v -run TestIBCRateLimit .
 
-ictest-full: ictest-basic ictest-ibc ictest-wasm ictest-packetforward ictest-tokenfactory ictest-ratelimit
+ictest-clean:
+	@echo "Cleaning up interchaintest cache"
+	@cd interchaintest && go clean -testcache
 
+ictest-full: ictest-clean ictest-basic ictest-ibc ictest-wasm ictest-packetforward ictest-tokenfactory ictest-ratelimit
+
+.PHONY: ictest-basic ictest-ibc ictest-wasm ictest-packetforward ictest-tokenfactory ictest-ratelimit ictest-clean ictest-full
 
 ###############################################################################
 ###                              image testnet                              ###
