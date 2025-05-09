@@ -98,6 +98,22 @@ builds:
     goarch:
       - amd64
     mod_timestamp: "{{ .CommitTimestamp }}"
+
+  - id: enokid-linux-amd64
+    main: ./cmd/enokid
+    binary: enokid
+    builder: go
+    gobinary: "go"
+    env:
+      - CGO_ENABLED=1
+      - CC=/opt/musl-cross/bin/x86_64-linux-musl-gcc
+      - LD=/opt/musl-cross/bin/x86_64-linux-musl-ld
+      - CGO_LDFLAGS=-L/lib
+    goos:
+      - linux
+    goarch:
+      - amd64
+    mod_timestamp: "{{ .CommitTimestamp }}"
     tags:
       - muslc
       - ledger
