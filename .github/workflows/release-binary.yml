@@ -15,9 +15,7 @@ on:
 jobs:
   release-binary:
     env:
-      VERSION: v0.0.1
-      COSMWASM_VERSION: v2.2.3
-      TM_VERSION: v0.38.17
+      REQUIRE_GO_VERSION: 1.23
     permissions: write-all
     runs-on: ubuntu-latest
     steps:
@@ -33,17 +31,71 @@ jobs:
       - name: Clean up dist directory
         run: rm -rf dist
 
-      - name: Build
-        uses: goreleaser/goreleaser-action@v6
-        with:
-          version: "~> v2"
-          args: build --skip validate --snapshot
+      - name: Check docker
+        run: |
+          docker --version
 
-      - name: Release
-        uses: goreleaser/goreleaser-action@v6
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          version: "~> v2"
-          args: release --skip validate --clean
+      - name: Set goreleaser environment variables
+        run: |
+          echo "GORELEASER_IMAGE=ghcr.io/goreleaser/goreleaser-cross:v${{ env.REQUIRE_GO_VERSION }}" >> $GITHUB_ENV
+          echo "TM_VERSION=$(go list -m github.com/cometbft/cometbft | sed 's:.* ::')" >> $GITHUB_ENV
+          echo "COSMWASM_VERSION=$(go list -m github.com/CosmWasm/wasmvm/v2 | sed 's/.* //')" >> $GITHUB_ENV
+      - name: Release with goreleaser container
+        run: |
+          echo "GORELEASER_IMAGE=${{ env.GORELEASER_IMAGE }}"
+          echo "TM_VERSION=${{ env.TM_VERSION }}"
+          echo "COSMWASM_VERSION=${{ env.COSMWASM_VERSION }}"
+          docker pull ${{ env.GORELEASER_IMAGE }}
+          docker run \
+          --rm \
+          -e CGO_ENABLED=1 \
+          -e GITHUB_TOKEN=${{ env.GITHUB_TOKEN }} \
+          -e TM_VERSION=${{ env.TM_VERSION }} \
+          -e COSMWASM_VERSION=${{ env.COSMWASM_VERSION }} \
+          -v `pwd`:/go/src/enokid \
+          -w /go/src/enokid \
+          ${{ env.GORELEASER_IMAGE }} \
+          release \
+          --timeout=90m \
+          --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GORELEASER_IMAGE: "ghcr.io/goreleaser/goreleaser-cross:v1.23"
+
+      # - name: Install osxcross
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y clang llvm build-essential
+      #     git clone https://github.com/tpoechtrager/osxcross.git
+      #     cd osxcross
+      #     wget -O tarballs/MacOSX11.3.sdk.tar.xz https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX11.3.sdk.tar.xz
+      #     UNATTENDED=yes ./build.sh
+      #     echo "Check osxcross"
+      #     ls ./target/bin
+      #     # which oa64-clang
+      #     # which o64-clang
+      #     # export PATH=$PATH:$(pwd)/target/bin
+      #     echo "$(pwd)/target/bin" >> $GITHUB_PATH
+
+      # - name: Debug osxcross
+      #   run: |
+      #     echo $PATH
+      #     echo $GITHUB_PATH
+      #     which o64-clang
+      #     o64-clang --version
+
+      # sudo is required in goreleaser pre hooks
+      # - name: Build
+      #   uses: goreleaser/goreleaser-action@v6
+      #   with:
+      #     version: "~> v2"
+      #     args: build --skip validate --snapshot
+
+      # - name: Release
+      #   uses: goreleaser/goreleaser-action@v6
+      #   if: startsWith(github.ref, 'refs/tags/')
+      #   with:
+      #     version: "~> v2"
+      #     args: release --skip validate --clean
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

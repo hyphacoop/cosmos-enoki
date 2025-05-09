@@ -3,6 +3,10 @@ name: E2E
 on:
   workflow_dispatch:
   # push:
+  pull_request:
+    branches:
+      - main
+      - release/**
 
 permissions:
   contents: read
@@ -57,7 +61,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build and export
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           tags: enoki:local

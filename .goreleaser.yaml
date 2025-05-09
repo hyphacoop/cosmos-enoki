@@ -5,15 +5,100 @@ project_name: enoki
 release:
   github:
     owner: hyphacoop
-    name: enoki
+    name: cosmos-enoki
   # name_template: '{{.Tag}}'
 
 env:
   - GO111MODULE=on
+  - CGO_ENABLED=1
   
 # Only uncomment os, arch, and targets if you are NOT using cosmwasm / wasm-light-client.
 # Windows, 386 (32bit), and ARM are not Wasm compatible.
 builds:
+  - id: "enokid-darwin-arm64"
+    main: ./cmd/enokid
+    binary: enokid
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    hooks:
+      pre:
+        - wget https://github.com/CosmWasm/wasmvm/releases/download/{{ .Env.COSMWASM_VERSION }}/libwasmvmstatic_darwin.a -O /lib/libwasmvmstatic_darwin.a
+    env:
+      - CC=o64-clang
+      - CGO_LDFLAGS=-L/lib
+    goos:
+      - darwin
+    goarch:
+      - arm64
+    tags:
+      - netgo
+      - ledger
+      - static_wasm
+    flags:
+      - -trimpath
+      - -mod=readonly
+
+    ldflags:
+      # .Env.TM_VERSION is provided in the workflow runner environment -> see .github/workflows/release.yml
+      - -s -w
+      - -linkmode=external
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=enoki
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=enokid
+      - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags=netgo,ledger,static_wasm
+      - -X github.com/cometbft/cometbft/version.TMCoreSemVer={{ .Env.TM_VERSION }}
+
+  - id: "enokid-darwin-amd64"
+    main: ./cmd/enokid
+    binary: enokid
+    goos:
+      - darwin
+    goarch:
+      - amd64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    hooks:
+      pre:
+        - wget https://github.com/CosmWasm/wasmvm/releases/download/{{ .Env.COSMWASM_VERSION }}/libwasmvmstatic_darwin.a -O /lib/libwasmvmstatic_darwin.a
+    env:
+      - CC=o64-clang
+      - CGO_LDFLAGS=-L/lib
+    tags:
+      - netgo
+      - ledger
+      - static_wasm
+    flags:
+      - -trimpath
+      - -mod=readonly
+
+    ldflags:
+      - -s -w
+      - -linkmode=external
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=enoki
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=enokid
+      - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags=netgo,ledger,static_wasm
+      - -X github.com/cometbft/cometbft/version.TMCoreSemVer={{ .Env.TM_VERSION }}
+
+  - id: enokid-linux-amd64
+    main: ./cmd/enokid
+    binary: enokid
+    builder: go
+    tool: "go"
+    env:
+      - CC=/opt/musl-cross/bin/x86_64-linux-musl-gcc
+      - LD=/opt/musl-cross/bin/x86_64-linux-musl-ld
+      - CGO_LDFLAGS=-L/lib
+    goos:
+      - linux
+    goarch:
+      - amd64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
   - id: enokid-linux-amd64
     main: ./cmd/enokid
     binary: enokid
@@ -34,12 +119,12 @@ builds:
       - ledger
     hooks:
       pre:
-        - sudo wget -O /lib/libwasmvm_muslc.x86_64.a https://github.com/CosmWasm/wasmvm/releases/download/{{ .Env.COSMWASM_VERSION }}/libwasmvm_muslc.x86_64.a
-        - sudo echo "a4a3d09b36fabb65b119d5ba23442c23694401fcbee4451fe6b7e22e325a4bac /lib/libwasmvm_muslc.x86_64.a" | sha256sum -c
-        - sudo cp /lib/libwasmvm_muslc.x86_64.a /lib/libwasmvm_muslc.a
-        - sudo curl -LO https://musl.cc/x86_64-linux-musl-cross.tgz
-        - sudo tar xf x86_64-linux-musl-cross.tgz
-        - sudo mv x86_64-linux-musl-cross /opt/musl-cross
+        - wget -O /lib/libwasmvm_muslc.x86_64.a https://github.com/CosmWasm/wasmvm/releases/download/{{ .Env.COSMWASM_VERSION }}/libwasmvm_muslc.x86_64.a
+        - echo "a4a3d09b36fabb65b119d5ba23442c23694401fcbee4451fe6b7e22e325a4bac /lib/libwasmvm_muslc.x86_64.a" | sha256sum -c
+        - cp /lib/libwasmvm_muslc.x86_64.a /lib/libwasmvm_muslc.a
+        - curl -LO https://musl.cc/x86_64-linux-musl-cross.tgz
+        - tar xf x86_64-linux-musl-cross.tgz
+        - mv x86_64-linux-musl-cross /opt/musl-cross
     ldflags:
       - -s -w
       - -linkmode=external
@@ -52,42 +137,11 @@ builds:
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
       - -X github.com/cosmos/cosmos-sdk/version.BuildTags=muslc,ledger
       - -X github.com/cometbft/cometbft/version.TMCoreSemVer={{ .Env.TM_VERSION }}
-    # goos:
-    #   - linux
-    #   # - darwin
-    #   # - windows
-    # goarch:
-    #   - amd64
-    #   # - arm64
-    #   # - "386"
-    # goarm:
-    #   - "6"
-    # gomips:
-    #   - hardfloat
-    # goamd64:
-    #   - v1
-    # targets:
-    #   - linux_amd64_v1
-    #   # - darwin_amd64_v1
-    #   # - linux_arm64
-    #   # - linux_386
-    #   # - darwin_arm64
-    #   # - windows_amd64_v1
-    #   # - windows_arm64
-    #   # - windows_386
-    # dir: .
-    # main: ./cmd/enokid
-    # binary: enokid
-    # builder: go
-    # gobinary: go
-    # command: build
-    # ldflags:
-    #   - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser
-    #   - -extldflags "-Wl,-z,muldefs -static -z noexecstack"
+
 archives:
   - id: default
-    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
-    format: tar.gz
+    name_template: '{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
+    formats: [ 'tar.gz' ]
     files:
       - src: license*
       - src: LICENSE*
@@ -98,7 +152,7 @@ archives:
 snapshot:
   version_template: '{{ .Version }}-SNAPSHOT-{{ .ShortCommit }}'
 checksum:
-  name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
+  name_template: '{{ .ProjectName }}_v{{ .Version }}_checksums.txt'
   algorithm: sha256
 dist: dist
 env_files:
@@ -116,3 +170,5 @@ github_urls:
   download: https://github.com
 gitlab_urls:
   download: https://gitlab.com
+changelog:
+  disable: true
