@@ -227,13 +227,13 @@ endif
 setup-ic-testnet: mod-tidy is-localic-installed local-image
 
 ic-testnet: setup-ic-testnet
-	local-ic start standalone
+	local-ic start enoki
 
 ic-testnet-ibc: setup-ic-testnet
-	local-ic start self-ibc
+	local-ic start enoki-ibc
 
 ic-testnet-gaia: setup-ic-testnet
-	local-ic start ibc-gaia
+	local-ic start enoki-gaia
 
 .PHONY: get-localic is-localic-installed setup-ic-testnet ic-testnet ic-testnet-ibc ic-testnet-gaia
 
@@ -256,10 +256,10 @@ help:
 	@echo "Available targets:"
 	@echo "  install             : Install the binary"
 	@echo "  local-image         : Install the docker image"
-	@echo "  ic-testnet          : Local devnet"
-	@echo "  ic-testnet-ibc      : Local devnet with IBC channel to second Enoki devnet"
-	@echo "  ic-testnet-gaia     : Local devnet with IBC channel to Gaia devnet"
-	@echo "  sh-testnet          : Shell local devnet"
+	@echo "  ic-testnet          : Local testnet"
+	@echo "  ic-testnet-ibc      : Local testnet with IBC channel to second Enoki devnet"
+	@echo "  ic-testnet-gaia     : Local testnet with IBC channel to Gaia devnet"
+	@echo "  sh-testnet          : Shell local testnet"
 	@echo "  ictest-full         : Run all e2e tests"
 
 .PHONY: help
