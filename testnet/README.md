@@ -53,7 +53,8 @@ enokid keys add validator
 This will output an `enoki` address, its public key, and a mnemonic. Save the mnemonic in a safe place.
 
 2. Fund the self-delegation account.
-Go to `https://faucet.polypore.xyz/request?address=<self-delegation-account>&chain=test-enoki-1` to get some funds sent to your account. Enter the address from step 1 instead of `<self-delegation-account>`.
+   
+Go to `https://faucet.polypore.xyz/request?address=<self-delegation-account>&chain=test-enoki-1` to get some funds sent to your account. Enter the address from the previous step instead of `<self-delegation-account>`.
 
 3. Obtain your validator public key.
 ```
@@ -61,7 +62,9 @@ enokid comet show-validator
 {"@type":"/cosmos.crypto.ed25519.PubKey","key":"BShP2dtw02I/1SnLp/D/RBHoeEaG3NqlMkwWYZOqcug="}
 ```
 
-4. Create a validator JSON (`validator.json`) file, replacing the `pubkey` value from the `show-validator` command above and edit the other values for your needs.
+4. Create a validator JSON (`validator.json`) file.
+
+Replace the `pubkey` value from the `show-validator` command above and edit the other values for your needs.
 ```
 {
   "pubkey": {"@type":"/cosmos.crypto.ed25519.PubKey","key":"BShP2dtw02I/1SnLp/D/RBHoeEaG3NqlMkwWYZOqcug="},
