@@ -1,5 +1,5 @@
 #!/bin/bash
-# Set up an Enoki service to join the public  testnet.
+# Set up an Enoki service to join the public testnet.
 
 # Configuration
 # You should only have to modify the values in this block
@@ -90,15 +90,14 @@ echo "[Install]"                            | sudo tee /etc/systemd/system/$SERV
 echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$SERVICE_NAME.service -a
 
 # Start service
-echo "Starting $SERVICE_NAME.service..."
+echo "> Starting $SERVICE_NAME.service"
 sudo systemctl daemon-reload
 sudo systemctl enable $SERVICE_NAME.service
 sudo systemctl start $SERVICE_NAME.service
 sudo systemctl restart systemd-journald
 
-# Add go/bin to the path
-# echo "Setting up path for binary bin..."
-# echo "export PATH=$PATH:/$HOME/go/bin" >> .profile
+echo "> Setting up path for binary bin."
+echo "export PATH=$PATH:/$HOME/go/bin" >> .profile
 
 echo "***********************"
 echo "To see the Enoki log enter:"
