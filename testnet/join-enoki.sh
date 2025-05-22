@@ -15,7 +15,7 @@ GAS_PRICE=0.001$DENOM
 
 CHAIN_BINARY='enokid'
 CHAIN_ID=test-enoki-1
-GENESIS_URL=https://github.com/hyphacoop/cosmos-enoki/raw/main/testnet/genesis.json
+GENESIS_URL=https://raw.githubusercontent.com/hyphacoop/cosmos-enoki/refs/heads/main/testnet/genesis.json
 PEERS="6979df4e3fa27dcef2fe1a22ad4b8c052c423537@sentry-01.enoki.polypore.xyz:26656"
 SYNC_RPC_1=https://rpc.sentry-01.enoki.polypore.xyz:443
 SYNC_RPC_2=https://rpc.sentry-01.enoki.polypore.xyz:443
