@@ -11,6 +11,7 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/strangelove-ventures/interchaintest/v8/testutil"
 	tokenfactory "github.com/strangelove-ventures/tokenfactory/x/tokenfactory/types"
+	"github.com/tidwall/gjson"
 
 	sdkmath "cosmossdk.io/math"
 
@@ -35,6 +36,7 @@ var (
 	NumberVals         = 1
 	NumberFullNodes    = 0
 	GenesisFundsAmount = sdkmath.NewInt(1000_000000) // 1k tokens
+	FeeMarketMaxGas    = "50000000"
 
 	ChainImage = ibc.NewDockerImage("enoki", "local", "1025:1025")
 
@@ -47,7 +49,10 @@ var (
 		// tokenfactory: set create cost in set denom or in gas usage.
 		cosmos.NewGenesisKV("app_state.tokenfactory.params.denom_creation_fee", nil),
 		cosmos.NewGenesisKV("app_state.tokenfactory.params.denom_creation_gas_consume", 1), // cost 1 gas to create a new denom
-
+		// feemarket: set params and starting state
+		cosmos.NewGenesisKV("app_state.feemarket.params.min_base_gas_price", "0.001"),
+		cosmos.NewGenesisKV("app_state.feemarket.params.max_block_utilization", FeeMarketMaxGas),
+		cosmos.NewGenesisKV("app_state.feemarket.state.base_gas_price", "0.001"),
 	}
 
 	DefaultChainConfig = ibc.ChainConfig{
@@ -64,7 +69,7 @@ var (
 		Bech32Prefix:   Bech32,
 		Denom:          Denom,
 		CoinType:       "118",
-		GasPrices:      "0" + Denom,
+		GasPrices:      "0.001" + Denom,
 		TrustingPeriod: "504h",
 	}
 
@@ -192,4 +197,16 @@ func getTransferChannel(channels []ibc.ChannelOutput) (string, error) {
 	}
 
 	return "", fmt.Errorf("no open transfer channel found: %+v", channels)
+}
+
+func QueryJSON(c *cosmos.CosmosChain, ctx context.Context, jsonPath string, query ...string) (gjson.Result, error) {
+	stdout, _, err := c.GetNode().ExecQuery(ctx, query...)
+	if err != nil {
+		return gjson.Result{}, err
+	}
+	retval := gjson.GetBytes(stdout, jsonPath)
+	if !retval.Exists() {
+		return gjson.Result{}, fmt.Errorf("json path %s not found in query result %s", jsonPath, stdout)
+	}
+	return retval, nil
 }

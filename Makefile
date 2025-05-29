@@ -198,7 +198,7 @@ ictest-ratelimit:
 
 ictest-feemarket:
 	@echo "Running feemarket e2e test"
-	@cd interchaintest && go test -race -v -run TestFeemarket .
+	@cd interchaintest && go test -race -v -count=1 -run TestFeemarket .
 
 ictest-clean:
 	@echo "Cleaning up interchaintest cache"

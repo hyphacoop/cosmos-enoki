@@ -115,7 +115,7 @@ from_scratch () {
   # feemarket 
   update_test_genesis `printf '.app_state["feemarket"]["params"]["fee_denom"]="%s"' $DENOM`
   update_test_genesis '.app_state["feemarket"]["params"]["min_base_gas_price"]="0.005"'
-  update_test_genesis '.app_state["feemarket"]["state"]["base_gas_price"]="0.5"'
+  update_test_genesis '.app_state["feemarket"]["state"]["base_gas_price"]="0.005"'
 
   BASE_GENESIS_ALLOCATIONS="100000000000000000000000000$DENOM,100000000test"
 
