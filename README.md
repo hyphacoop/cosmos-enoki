@@ -17,6 +17,11 @@ Enoki is Hypha's reference binary for the Interchain stack. There is a [public t
   * Wasmd v0.55.0
 * Ledger support
 
+#### Version Selection
+
+* The module versions in this build are considered to be stable.
+* Dependencies will be bumped as the compatibility between modules allows.
+
 ## Local Builds
 
 - `make install`
