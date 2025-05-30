@@ -5,6 +5,7 @@ import (
 
 	ibcante "github.com/cosmos/ibc-go/v10/modules/core/ante"
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
+	feemarketante "github.com/skip-mev/feemarket/x/feemarket/ante"
 	feemarketkeeper "github.com/skip-mev/feemarket/x/feemarket/keeper"
 
 	corestoretypes "cosmossdk.io/core/store"
@@ -19,6 +20,8 @@ import (
 
 type HandlerOptions struct {
 	ante.HandlerOptions
+	BankKeeper            feemarketante.BankKeeper
+	AccountKeeper         feemarketante.AccountKeeper
 	IBCKeeper             *ibckeeper.Keeper
 	WasmConfig            *wasmtypes.NodeConfig
 	TXCounterStoreService corestoretypes.KVStoreService
@@ -56,7 +59,17 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 		ante.NewTxTimeoutHeightDecorator(),
 		ante.NewValidateMemoDecorator(options.AccountKeeper),
 		ante.NewConsumeGasForTxSizeDecorator(options.AccountKeeper),
-		ante.NewDeductFeeDecorator(options.AccountKeeper, options.BankKeeper, options.FeegrantKeeper, options.TxFeeChecker),
+		feemarketante.NewFeeMarketCheckDecorator( // fee market check replaces fee deduct decorator
+			options.AccountKeeper,
+			options.BankKeeper,
+			options.FeegrantKeeper,
+			options.FeeMarketKeeper,
+			ante.NewDeductFeeDecorator(
+				options.AccountKeeper,
+				options.BankKeeper,
+				options.FeegrantKeeper,
+				options.TxFeeChecker,
+			)), // fees are deducted in the fee market deduct post handler
 		ante.NewSetPubKeyDecorator(options.AccountKeeper), // SetPubKeyDecorator must be called before all signature verification decorators
 		ante.NewValidateSigCountDecorator(options.AccountKeeper),
 		ante.NewSigGasConsumeDecorator(options.AccountKeeper, options.SigGasConsumer),
