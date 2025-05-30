@@ -52,7 +52,6 @@ jobs:
           -e GITHUB_TOKEN=${{ env.GITHUB_TOKEN }} \
           -e TM_VERSION=${{ env.TM_VERSION }} \
           -e COSMWASM_VERSION=${{ env.COSMWASM_VERSION }} \
-          -e MUSL_CC_URL=${{ env.MUSL_CC_URL }} \
           -v `pwd`:/go/src/enokid \
           -w /go/src/enokid \
           ${{ env.GORELEASER_IMAGE }} \
