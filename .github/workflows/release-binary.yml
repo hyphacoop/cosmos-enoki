@@ -52,6 +52,7 @@ jobs:
           -e GITHUB_TOKEN=${{ env.GITHUB_TOKEN }} \
           -e TM_VERSION=${{ env.TM_VERSION }} \
           -e COSMWASM_VERSION=${{ env.COSMWASM_VERSION }} \
+          -e MUSL_CC_URL=${{ env.MUSL_CC_URL }} \
           -v `pwd`:/go/src/enokid \
           -w /go/src/enokid \
           ${{ env.GORELEASER_IMAGE }} \
@@ -60,7 +61,7 @@ jobs:
           --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # GORELEASER_IMAGE: "ghcr.io/goreleaser/goreleaser-cross:v1.23"
+          MUSL_CC_URL: http://build-helper.stg.earthball.xyz:8000/x86_64-linux-musl-cross.tgz
 
       # - name: Install osxcross
       #   run: |
