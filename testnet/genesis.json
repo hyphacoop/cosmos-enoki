@@ -1,6 +1,6 @@
 {
   "app_name": "enokid",
-  "app_version": "v1.0.0-rc0",
+  "app_version": "v1.0.0-rc1",
   "genesis_time": "2025-05-12T14:38:42.459676941Z",
   "chain_id": "test-enoki-1",
   "initial_height": 1,
@@ -177,10 +177,8 @@
                 }
               }
             ],
-            "memo": "073a66b646bc1fb5bb7fcc626f3209c8d0c46c25@192.168.5.153:26656",
+            "memo": "073a66b646bc1fb5bb7fcc626f3209c8d0c46c25@192.168.5.188:26656",
             "timeout_height": "0",
-            "unordered": false,
-            "timeout_timestamp": null,
             "extension_options": [],
             "non_critical_extension_options": []
           },
@@ -208,7 +206,7 @@
             "tip": null
           },
           "signatures": [
-            "bWxdeJDoayh1NlIxR10fA979sYOyDVRbATnVBwWnHHMPNjY6vJ+eiR2lIwmMWV/Upo9/Sxe2/CXbtZQJywWsjA=="
+            "Qp8JzMNELaPW2MQJEH/REcDPODvcMP2Di0xcYzkj17NYJvLgN/bXZnABssUmiOvrohxkUBL13cLJg7jRQFBGXg=="
           ]
         }
       ]
