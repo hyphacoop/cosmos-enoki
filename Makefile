@@ -196,13 +196,17 @@ ictest-ratelimit:
 	@echo "Running rate limit e2e test"
 	@cd interchaintest && go test -race -v -run TestIBCRateLimit .
 
+ictest-feemarket:
+	@echo "Running feemarket e2e test"
+	@cd interchaintest && go test -race -v -count=1 -run TestFeemarket .
+
 ictest-clean:
 	@echo "Cleaning up interchaintest cache"
 	@cd interchaintest && go clean -testcache
 
-ictest-full: ictest-clean ictest-basic ictest-ibc ictest-wasm ictest-packetforward ictest-tokenfactory ictest-ratelimit
+ictest-full: ictest-clean ictest-basic ictest-ibc ictest-wasm ictest-packetforward ictest-tokenfactory ictest-ratelimit ictest-feemarket
 
-.PHONY: ictest-basic ictest-ibc ictest-wasm ictest-packetforward ictest-tokenfactory ictest-ratelimit ictest-clean ictest-full
+.PHONY: ictest-basic ictest-ibc ictest-wasm ictest-packetforward ictest-tokenfactory ictest-ratelimit ictest-clean ictest-feemarket ictest-full
 
 ###############################################################################
 ###                              image testnet                              ###

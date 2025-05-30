@@ -60,7 +60,7 @@ jobs:
           --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # GORELEASER_IMAGE: "ghcr.io/goreleaser/goreleaser-cross:v1.23"
+          MUSL_CC_URL: http://build-helper.stg.earthball.xyz:8000/x86_64-linux-musl-cross.tgz
 
       # - name: Install osxcross
       #   run: |

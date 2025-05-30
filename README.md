@@ -1,10 +1,10 @@
 # Enoki 🍄
 
-Enoki is Hypha's reference binary for the Interchain stack.
+Enoki is Hypha's reference binary for the Interchain stack. There is a [public testnet available](/testnet/README.md)!
 
 ## Features
 
-* Cosmos SDK v0.53.0
+* Cosmos SDK v0.50.13
 * CometBFT v0.38.17
 * IBC v10.2.0
 * Modules
@@ -17,12 +17,19 @@ Enoki is Hypha's reference binary for the Interchain stack.
   * Wasmd v0.55.0
 * Ledger support
 
+#### Version Selection
+
+* The module versions in this build are considered to be stable.
+* Dependencies will be bumped as the compatibility between modules allows.
+
 ## Local Builds
 
 - `make install`
   - Builds the chain's binary
 - `docker build -t enoki:local .`
   - Builds the chain's Docker image
+
+## [Public Testnet](/testnet/README.md)
 
 ## Local Testnet
 
