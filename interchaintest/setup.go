@@ -59,7 +59,7 @@ var (
 		Images: []ibc.DockerImage{
 			ChainImage,
 		},
-		GasAdjustment:  1.5,
+		GasAdjustment:  3,
 		ModifyGenesis:  cosmos.ModifyGenesis(DefaultGenesis),
 		EncodingConfig: GetEncodingConfig(),
 		Type:           "cosmos",
