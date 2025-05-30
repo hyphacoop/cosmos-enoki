@@ -29,8 +29,6 @@ jobs:
         run: |
           echo "go-build=$(go env GOCACHE)" >> $GITHUB_OUTPUT
           echo "go-mod=$(go env GOMODCACHE)" >> $GITHUB_OUTPUT
-          # echo "::set-output name=go-build::$(go env GOCACHE)"
-          # echo "::set-output name=go-mod::$(go env GOMODCACHE)"
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -88,6 +86,7 @@ jobs:
           - "ictest-ibc"  #
           - "ictest-packetforward"  #
           - "ictest-ratelimit"  #
+          - "ictest-feemarket"
       fail-fast: false
 
     steps:
@@ -95,8 +94,6 @@ jobs:
         run: |
           echo "go-build=$(go env GOCACHE)" >> $GITHUB_OUTPUT
           echo "go-mod=$(go env GOMODCACHE)" >> $GITHUB_OUTPUT
-          # echo "::set-output name=go-build::$(go env GOCACHE)"
-          # echo "::set-output name=go-mod::$(go env GOMODCACHE)"
 
       - name: Set up Go ${{ env.GO_VERSION }}
         uses: actions/setup-go@v4
