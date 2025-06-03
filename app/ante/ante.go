@@ -57,24 +57,24 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 		circuitante.NewCircuitBreakerDecorator(options.CircuitKeeper),
 		ante.NewValidateBasicDecorator(),
 		ante.NewTxTimeoutHeightDecorator(),
-		ante.NewValidateMemoDecorator(options.AccountKeeper),
-		ante.NewConsumeGasForTxSizeDecorator(options.AccountKeeper),
+		ante.NewValidateMemoDecorator(options.HandlerOptions.AccountKeeper),
+		ante.NewConsumeGasForTxSizeDecorator(options.HandlerOptions.AccountKeeper),
 		feemarketante.NewFeeMarketCheckDecorator( // fee market check replaces fee deduct decorator
 			options.AccountKeeper,
 			options.BankKeeper,
 			options.FeegrantKeeper,
 			options.FeeMarketKeeper,
 			ante.NewDeductFeeDecorator(
-				options.AccountKeeper,
+				options.HandlerOptions.AccountKeeper,
 				options.BankKeeper,
 				options.FeegrantKeeper,
 				options.TxFeeChecker,
 			)), // fees are deducted in the fee market deduct post handler
-		ante.NewSetPubKeyDecorator(options.AccountKeeper), // SetPubKeyDecorator must be called before all signature verification decorators
-		ante.NewValidateSigCountDecorator(options.AccountKeeper),
-		ante.NewSigGasConsumeDecorator(options.AccountKeeper, options.SigGasConsumer),
-		ante.NewSigVerificationDecorator(options.AccountKeeper, options.SignModeHandler),
-		ante.NewIncrementSequenceDecorator(options.AccountKeeper),
+		ante.NewSetPubKeyDecorator(options.HandlerOptions.AccountKeeper), // SetPubKeyDecorator must be called before all signature verification decorators
+		ante.NewValidateSigCountDecorator(options.HandlerOptions.AccountKeeper),
+		ante.NewSigGasConsumeDecorator(options.HandlerOptions.AccountKeeper, options.SigGasConsumer),
+		ante.NewSigVerificationDecorator(options.HandlerOptions.AccountKeeper, options.SignModeHandler),
+		ante.NewIncrementSequenceDecorator(options.HandlerOptions.AccountKeeper),
 		ibcante.NewRedundantRelayDecorator(options.IBCKeeper),
 	}
 
