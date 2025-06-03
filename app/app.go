@@ -1032,21 +1032,16 @@ func NewEnokiApp(
 
 	antehandler, err := enokiante.NewAnteHandler(
 		enokiante.HandlerOptions{
-			HandlerOptions: ante.HandlerOptions{
-				// Cdc:             app.appCodec,
-				AccountKeeper:   app.AccountKeeper,
-				BankKeeper:      app.BankKeeper,
-				FeegrantKeeper:  app.FeeGrantKeeper,
-				SignModeHandler: txConfig.SignModeHandler(),
-				SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
-			},
-			AccountKeeper:         app.AccountKeeper,
+			AccountKeeper:         &app.AccountKeeper,
 			BankKeeper:            app.BankKeeper,
+			FeegrantKeeper:        app.FeeGrantKeeper,
+			SignModeHandler:       txConfig.SignModeHandler(),
+			SigGasConsumer:        ante.DefaultSigVerificationGasConsumer,
 			IBCKeeper:             app.IBCKeeper,
 			WasmConfig:            &wasmConfig,
-			TXCounterStoreService: runtime.NewKVStoreService(app.keys[wasmtypes.StoreKey]),
 			CircuitKeeper:         &app.CircuitKeeper,
 			FeeMarketKeeper:       app.FeeMarketKeeper,
+			TXCounterStoreService: runtime.NewKVStoreService(app.keys[wasmtypes.StoreKey]),
 		},
 	)
 	if err != nil {
