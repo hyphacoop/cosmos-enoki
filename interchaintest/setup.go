@@ -50,9 +50,9 @@ var (
 		cosmos.NewGenesisKV("app_state.tokenfactory.params.denom_creation_fee", nil),
 		cosmos.NewGenesisKV("app_state.tokenfactory.params.denom_creation_gas_consume", 1), // cost 1 gas to create a new denom
 		// feemarket: set params and starting state
-		cosmos.NewGenesisKV("app_state.feemarket.params.min_base_gas_price", "0.001"),
+		cosmos.NewGenesisKV("app_state.feemarket.params.min_base_gas_price", "0.002"),
 		cosmos.NewGenesisKV("app_state.feemarket.params.max_block_utilization", FeeMarketMaxGas),
-		cosmos.NewGenesisKV("app_state.feemarket.state.base_gas_price", "0.001"),
+		cosmos.NewGenesisKV("app_state.feemarket.state.base_gas_price", "0.002"),
 	}
 
 	DefaultChainConfig = ibc.ChainConfig{
@@ -69,7 +69,7 @@ var (
 		Bech32Prefix:   Bech32,
 		Denom:          Denom,
 		CoinType:       "118",
-		GasPrices:      "0.001" + Denom,
+		GasPrices:      "0.002" + Denom,
 		TrustingPeriod: "504h",
 	}
 
