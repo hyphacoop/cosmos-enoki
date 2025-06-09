@@ -5,9 +5,9 @@ The Enoki public testnet provides a test environment for the current Enoki relea
 
 * **Chain ID**: `test-enoki-1`
 * **Denom**: `uoki`
-* **Current version**: [`v1.0.0-rc1`](httpshttps://github.com/hyphacoop/cosmos-enoki/releases/tag/v1.0.0-rc1)
+* **Current version**: [`v1.0.0`](httpshttps://github.com/hyphacoop/cosmos-enoki/releases/tag/v1.0.0)
 * **Genesis file:**  [genesis.json](genesis.json), verify with `shasum -a 256 genesis.json`
-* **Genesis sha256sum**: `df4ee50a1c48904755bce138957b59c61a290b1a8390b650d3e841ac8de661be`
+* **Genesis sha256sum**: `ecc14a44fa37c39107eb2b6f1670a6a9145192c3d63ee03aaabd83e2f0901b86`
 
 ## How to Join
 
