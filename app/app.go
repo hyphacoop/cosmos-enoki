@@ -73,9 +73,6 @@ import (
 	"cosmossdk.io/x/feegrant"
 	feegrantkeeper "cosmossdk.io/x/feegrant/keeper"
 	feegrantmodule "cosmossdk.io/x/feegrant/module"
-	"cosmossdk.io/x/nft"
-	nftkeeper "cosmossdk.io/x/nft/keeper"
-	nftmodule "cosmossdk.io/x/nft/module"
 	"cosmossdk.io/x/upgrade"
 	upgradekeeper "cosmossdk.io/x/upgrade/keeper"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
@@ -210,7 +207,6 @@ var maccPerms = map[string][]string{
 	stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
 	stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 	govtypes.ModuleName:            {authtypes.Burner},
-	nft.ModuleName:                 nil,
 	// non sdk modules
 	ibctransfertypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
 	icatypes.ModuleName:             nil,
@@ -259,7 +255,6 @@ type EnokiApp struct {
 	EvidenceKeeper        evidencekeeper.Keeper
 	FeeGrantKeeper        feegrantkeeper.Keeper
 	GroupKeeper           groupkeeper.Keeper
-	NFTKeeper             nftkeeper.Keeper
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
 	CircuitKeeper         circuitkeeper.Keeper
 
@@ -363,7 +358,6 @@ func NewEnokiApp(
 		evidencetypes.StoreKey,
 		circuittypes.StoreKey,
 		authzkeeper.StoreKey,
-		nftkeeper.StoreKey,
 		group.StoreKey,
 		// non sdk store keys
 		ibcexported.StoreKey,
@@ -626,13 +620,6 @@ func NewEnokiApp(
 		),
 	)
 
-	app.NFTKeeper = nftkeeper.NewKeeper(
-		runtime.NewKVStoreService(keys[nftkeeper.StoreKey]),
-		appCodec,
-		app.AccountKeeper,
-		app.BankKeeper,
-	)
-
 	// create evidence keeper with router
 	evidenceKeeper := evidencekeeper.NewKeeper(
 		appCodec,
@@ -844,7 +831,6 @@ func NewEnokiApp(
 		params.NewAppModule(app.ParamsKeeper),
 		authzmodule.NewAppModule(appCodec, app.AuthzKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		groupmodule.NewAppModule(appCodec, app.GroupKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
-		nftmodule.NewAppModule(appCodec, app.NFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		consensus.NewAppModule(appCodec, app.ConsensusParamsKeeper),
 		circuit.NewAppModule(appCodec, app.CircuitKeeper),
 		// non sdk modules
@@ -888,6 +874,7 @@ func NewEnokiApp(
 	// NOTE: capability module's beginblocker must come before any modules using capabilities (e.g. IBC)
 	app.ModuleManager.SetOrderBeginBlockers(
 		minttypes.ModuleName,
+
 		distrtypes.ModuleName,
 		slashingtypes.ModuleName,
 		evidencetypes.ModuleName,
@@ -900,17 +887,17 @@ func NewEnokiApp(
 		ibcexported.ModuleName,
 		ibctransfertypes.ModuleName,
 		icatypes.ModuleName,
+		tokenfactorytypes.ModuleName,
 		packetforwardtypes.ModuleName,
 		ratelimittypes.ModuleName,
-		genutiltypes.ModuleName,
 		authz.ModuleName,
 		feegrant.ModuleName,
+		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
 		feemarkettypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		wasmtypes.ModuleName,
 		ibcwasmtypes.ModuleName,
-		tokenfactorytypes.ModuleName,
 	)
 
 	app.ModuleManager.SetOrderEndBlockers(
@@ -918,9 +905,11 @@ func NewEnokiApp(
 		govtypes.ModuleName,
 		stakingtypes.ModuleName,
 		// additional non simd modules
+		group.ModuleName,
 		ibcexported.ModuleName,
 		ibctransfertypes.ModuleName,
 		icatypes.ModuleName,
+		tokenfactorytypes.ModuleName,
 		packetforwardtypes.ModuleName,
 		ratelimittypes.ModuleName,
 		authtypes.ModuleName,
@@ -932,13 +921,12 @@ func NewEnokiApp(
 		evidencetypes.ModuleName,
 		authz.ModuleName,
 		feegrant.ModuleName,
+		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
-		group.ModuleName,
 		feemarkettypes.ModuleName,
-		wasmtypes.ModuleName,
 		consensusparamtypes.ModuleName,
+		wasmtypes.ModuleName,
 		ibcwasmtypes.ModuleName,
-		tokenfactorytypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -962,7 +950,6 @@ func NewEnokiApp(
 		evidencetypes.ModuleName,
 		authz.ModuleName,
 		feegrant.ModuleName,
-		nft.ModuleName,
 		group.ModuleName,
 		paramstypes.ModuleName,
 		upgradetypes.ModuleName,
