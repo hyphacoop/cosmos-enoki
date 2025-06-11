@@ -6,7 +6,7 @@ Enoki is Hypha's reference binary for the Interchain stack. There is a [public t
 
 * Cosmos SDK v0.53.2
 * CometBFT v0.38.17
-* IBC v10.2.0
+* IBC v10.3.0
 * Modules
   * Circuit
   * Group
