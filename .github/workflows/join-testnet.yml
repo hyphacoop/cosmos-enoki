@@ -36,10 +36,10 @@ jobs:
       - name: Check sync status
         run: |
           sleep 60s
+          echo "> Node log:"
+          journalctl -u enokid
           echo "> enokid service status:"
           systemctl status enokid
-          echo "> Node log:"
-          journalctl -u enokid | tail -n 100
           echo "> Sync status:"
           curl -s $RPC_ENDPOINT/status | jq -r '.result.sync_info'
           chain_height=$(curl -s $RPC_ENDPOINT/block | jq -r '.result.block.header.height')
