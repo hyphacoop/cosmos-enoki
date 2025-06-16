@@ -62,7 +62,7 @@ CURRENT_BLOCK=$(curl -s $SYNC_RPC_1/block | jq -r '.result.block.header.height')
 TRUST_HEIGHT=$[$CURRENT_BLOCK-5000]
 TRUST_BLOCK=$(curl -s $SYNC_RPC_1/block\?height\=$TRUST_HEIGHT)
 TRUST_HASH=$(echo $TRUST_BLOCK | jq -r '.result.block_id.hash')
-sed -i -e '/enable =/ s/= .*/= true/' $NODE_HOME/config/config.toml
+# sed -i -e '/enable =/ s/= .*/= true/' $NODE_HOME/config/config.toml
 sed -i -e '/trust_period =/ s/= .*/= "24h0m0s"/' $NODE_HOME/config/config.toml
 sed -i -e "/trust_height =/ s/= .*/= $TRUST_HEIGHT/" $NODE_HOME/config/config.toml
 sed -i -e "/trust_hash =/ s/= .*/= \"$TRUST_HASH\"/" $NODE_HOME/config/config.toml
@@ -103,3 +103,5 @@ echo "***********************"
 echo "To see the Enoki log enter:"
 echo "journalctl -fu $SERVICE_NAME.service"
 echo "***********************"
+
+enokid version --long
