@@ -59,7 +59,7 @@ sed -i -e "s/persistent_peers = \"\"/persistent_peers = \"$PEERS\"/" $NODE_HOME/
 
 echo "> Configuring state sync."
 CURRENT_BLOCK=$(curl -s $SYNC_RPC_1/block | jq -r '.result.block.header.height')
-TRUST_HEIGHT=$[$CURRENT_BLOCK-5000]
+TRUST_HEIGHT=$[$CURRENT_BLOCK-3000]
 TRUST_BLOCK=$(curl -s $SYNC_RPC_1/block\?height\=$TRUST_HEIGHT)
 TRUST_HASH=$(echo $TRUST_BLOCK | jq -r '.result.block_id.hash')
 sed -i -e '/enable =/ s/= .*/= true/' $NODE_HOME/config/config.toml
