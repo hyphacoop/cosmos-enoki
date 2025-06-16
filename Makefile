@@ -246,7 +246,7 @@ ic-testnet-gaia: setup-ic-testnet
 ###############################################################################
 
 sh-testnet: mod-tidy
-	CHAIN_ID="test-enoki-1" BLOCK_TIME="2000ms" CLEAN=true sh scripts/test_node.sh
+	HOME_DIR=".enoki" CHAIN_ID="test-enoki-1" BLOCK_TIME="2000ms" CLEAN=true sh scripts/test_node.sh
 
 .PHONY: sh-testnet
 
