@@ -101,9 +101,6 @@ from_scratch () {
   # mint
   update_test_genesis `printf '.app_state["mint"]["params"]["mint_denom"]="%s"' $DENOM`
 
-  # crisis
-  update_test_genesis `printf '.app_state["crisis"]["constant_fee"]={"denom":"%s","amount":"1000"}' $DENOM`
-
   ## abci
   update_test_genesis '.consensus["params"]["abci"]["vote_extensions_enable_height"]="1"'
 

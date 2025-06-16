@@ -60,9 +60,6 @@ func (app *EnokiApp) ExportAppStateAndValidators(forZeroHeight bool, jailAllowed
 func (app *EnokiApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs []string) {
 	var err error
 
-	// Just to be safe, assert the invariants on current state.
-	app.CrisisKeeper.AssertInvariants(ctx)
-
 	// set context height to zero
 	height := ctx.BlockHeight()
 	ctx = ctx.WithBlockHeight(0)
