@@ -13,7 +13,7 @@ on:
   push:
 
 jobs:
-  test-provider:
+  test-sync:
     runs-on: ubuntu-22.04
     env:
       RPC_ENDPOINT: https://rpc.sentry-01.enoki.polypore.xyz
@@ -47,6 +47,6 @@ jobs:
           echo "> Chain height: $chain_height"
           echo "> Node height: $node_height"
           if [ "$chain_height" -ne "$node_height" ]; then
-            echo "Node is not synced with the chain. Exiting."
+            echo "Node is not synced with the testnet."
             exit 1
           fi
