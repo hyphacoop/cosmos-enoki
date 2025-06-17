@@ -7,7 +7,7 @@
 NODE_HOME=~/.enoki
 NODE_MONIKER=enoki-test
 SERVICE_NAME=enokid
-CHAIN_VERSION=v1.0.0
+CHAIN_VERSION=v1.1.0-rc1
 CHAIN_BINARY_URL=https://github.com/hyphacoop/cosmos-enoki/releases/download/$CHAIN_VERSION/enoki_${CHAIN_VERSION}_linux_amd64.tar.gz
 DENOM=uoki
 GAS_PRICE=0.001$DENOM
