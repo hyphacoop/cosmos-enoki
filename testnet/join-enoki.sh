@@ -19,6 +19,7 @@ GENESIS_URL=https://raw.githubusercontent.com/hyphacoop/cosmos-enoki/refs/heads/
 PEERS="6979df4e3fa27dcef2fe1a22ad4b8c052c423537@sentry-01.enoki.polypore.xyz:26656"
 SYNC_RPC_1=https://rpc.sentry-01.enoki.polypore.xyz:443
 SYNC_RPC_2=https://rpc.sentry-01.enoki.polypore.xyz:443
+TRUST_OFFSET=3000
 SYNC_RPC_SERVERS="$SYNC_RPC_1,$SYNC_RPC_2"
 
 echo "> Installing curl, jq, and wget."
@@ -59,7 +60,7 @@ sed -i -e "s/persistent_peers = \"\"/persistent_peers = \"$PEERS\"/" $NODE_HOME/
 
 echo "> Configuring state sync."
 CURRENT_BLOCK=$(curl -s $SYNC_RPC_1/block | jq -r '.result.block.header.height')
-TRUST_HEIGHT=$[$CURRENT_BLOCK-1000]
+TRUST_HEIGHT=$[$CURRENT_BLOCK-$TRUST_OFFSET]
 TRUST_BLOCK=$(curl -s $SYNC_RPC_1/block\?height\=$TRUST_HEIGHT)
 TRUST_HASH=$(echo $TRUST_BLOCK | jq -r '.result.block_id.hash')
 sed -i -e '/enable =/ s/= .*/= true/' $NODE_HOME/config/config.toml
@@ -103,3 +104,5 @@ echo "***********************"
 echo "To see the Enoki log enter:"
 echo "journalctl -fu $SERVICE_NAME.service"
 echo "***********************"
+
+enokid version --long
