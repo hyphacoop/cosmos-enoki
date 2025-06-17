@@ -18,16 +18,16 @@ replace (
 
 require (
 	cosmossdk.io/api v0.9.2
-	cosmossdk.io/client/v2 v2.0.0-beta.8
+	cosmossdk.io/client/v2 v2.0.0-beta.9
 	cosmossdk.io/core v0.12.0
 	cosmossdk.io/errors v1.0.2 // indirect
 	cosmossdk.io/log v1.6.0
 	cosmossdk.io/math v1.5.3
 	cosmossdk.io/store v1.1.2
 	cosmossdk.io/tools/confix v0.1.2
-	cosmossdk.io/x/circuit v0.1.1
-	cosmossdk.io/x/evidence v0.1.1
-	cosmossdk.io/x/feegrant v0.1.1
+	cosmossdk.io/x/circuit v0.2.0
+	cosmossdk.io/x/evidence v0.2.0
+	cosmossdk.io/x/feegrant v0.2.0
 	cosmossdk.io/x/tx v0.14.0
 	cosmossdk.io/x/upgrade v0.2.0
 	github.com/CosmWasm/wasmd v0.60.1
@@ -49,7 +49,7 @@ require (
 
 require (
 	github.com/CosmWasm/wasmvm/v2 v2.2.4
-	github.com/cosmos/ibc-go/modules/light-clients/08-wasm/v10 v10.1.1
+	github.com/cosmos/ibc-go/modules/light-clients/08-wasm/v10 v10.3.0
 	github.com/skip-mev/feemarket v1.1.1 // Replace with the latest version
 
 )
