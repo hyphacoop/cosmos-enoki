@@ -1,6 +1,6 @@
 {
   "app_name": "enokid",
-  "app_version": "v1.0.0-rc2",
+  "app_version": "v1.0.0",
   "genesis_time": "2025-05-12T14:38:42.459676941Z",
   "chain_id": "test-enoki-1",
   "initial_height": 1,
