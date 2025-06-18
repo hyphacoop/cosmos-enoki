@@ -30,9 +30,9 @@ jobs:
           testnet/join-enoki.sh
       - name: Check sync status
         run: |
-          sleep 60s
+          sleep 3m
           echo "> Node log:"
-          journalctl -u enokid
+          journalctl -u enokid | tail -n 100
           echo "> enokid service status:"
           systemctl status enokid
           echo "> Sync status:"
