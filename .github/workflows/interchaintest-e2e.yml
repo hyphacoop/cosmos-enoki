@@ -8,7 +8,7 @@ on:
       - main
       - release/**
     paths-ignore:
-      - 'testnet/**''
+      - 'testnet/**'
       - .github/workflows/join-testnet.yml
 
 permissions:
