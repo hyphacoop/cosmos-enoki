@@ -6,6 +6,10 @@ on:
   schedule:
     # At 14:30 on Tuesday and Thursday.
     - cron: '30 14 * * 2,4'
+  pull_request:
+    paths:
+    - 'testnet/join-enoki.sh'
+    - .github/workflows/join-testnet.yml
 
 jobs:
   test-sync:
