@@ -149,7 +149,7 @@ source:
 gomod:
   gobinary: go
 git:
-  tag_sort: -version:refname
+  tag_sort: committerdate
 github_urls:
   download: https://github.com
 gitlab_urls:
