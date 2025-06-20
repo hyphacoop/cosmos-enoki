@@ -32,7 +32,7 @@ require (
 	cosmossdk.io/x/upgrade v0.2.0
 	github.com/CosmWasm/wasmd v0.60.1
 	github.com/cometbft/cometbft v0.38.17
-	github.com/cosmos/cosmos-db v1.1.1
+	github.com/cosmos/cosmos-db v1.1.3
 	github.com/cosmos/cosmos-sdk v0.53.2
 	github.com/cosmos/gogoproto v1.7.0
 	github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v10 v10.1.0
@@ -51,7 +51,6 @@ require (
 	github.com/CosmWasm/wasmvm/v2 v2.2.4
 	github.com/cosmos/ibc-go/modules/light-clients/08-wasm/v10 v10.3.0
 	github.com/skip-mev/feemarket v1.1.1 // Replace with the latest version
-
 )
 
 require (
