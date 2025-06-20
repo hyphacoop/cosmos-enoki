@@ -39,7 +39,7 @@ require (
 	github.com/cosmos/ibc-apps/modules/rate-limiting/v10 v10.1.0
 	github.com/cosmos/ibc-go/v10 v10.3.0
 	github.com/prometheus/client_golang v1.22.0
-	github.com/spf13/cast v1.8.0
+	github.com/spf13/cast v1.9.2
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.1
 	github.com/strangelove-ventures/tokenfactory v0.50.6-wasmvm2
@@ -51,7 +51,6 @@ require (
 	github.com/CosmWasm/wasmvm/v2 v2.2.4
 	github.com/cosmos/ibc-go/modules/light-clients/08-wasm/v10 v10.3.0
 	github.com/skip-mev/feemarket v1.1.1 // Replace with the latest version
-
 )
 
 require (
