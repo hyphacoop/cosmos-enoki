@@ -1,3 +1,5 @@
+[![Join Enoki Testnet](https://github.com/hyphacoop/cosmos-enoki/actions/workflows/join-testnet.yml/badge.svg)](https://github.com/hyphacoop/cosmos-enoki/actions/workflows/join-testnet.yml)
+
 # Enoki 🍄
 
 Enoki is Hypha's reference binary for the Interchain stack. There is a [public testnet available](/testnet/README.md)!
