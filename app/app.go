@@ -22,6 +22,7 @@ import (
 	ratelimitkeeper "github.com/cosmos/ibc-apps/modules/rate-limiting/v10/keeper"
 	ratelimittypes "github.com/cosmos/ibc-apps/modules/rate-limiting/v10/types"
 	ratelimitv2 "github.com/cosmos/ibc-apps/modules/rate-limiting/v10/v2"
+	ibcwasm "github.com/cosmos/ibc-go/modules/light-clients/08-wasm/v10"
 	"github.com/cosmos/ibc-go/modules/light-clients/08-wasm/v10/blsverifier"
 	ibcwasmkeeper "github.com/cosmos/ibc-go/modules/light-clients/08-wasm/v10/keeper"
 	ibcwasmtypes "github.com/cosmos/ibc-go/modules/light-clients/08-wasm/v10/types"
@@ -330,8 +331,6 @@ func NewEnokiApp(
 	// }
 	// baseAppOptions = append(baseAppOptions, voteExtOp)
 
-	baseAppOptions = append(baseAppOptions)
-
 	bApp := baseapp.NewBaseApp(appName, logger, db, txConfig.TxDecoder(), baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)
 	bApp.SetVersion(version.Version)
@@ -340,7 +339,8 @@ func NewEnokiApp(
 	bApp.SetTxEncoder(txConfig.TxEncoder())
 
 	keys := storetypes.NewKVStoreKeys(
-		authtypes.StoreKey, banktypes.StoreKey,
+		authtypes.StoreKey,
+		banktypes.StoreKey,
 		stakingtypes.StoreKey,
 		minttypes.StoreKey,
 		distrtypes.StoreKey,
@@ -357,13 +357,14 @@ func NewEnokiApp(
 		// non sdk store keys
 		ibcexported.StoreKey,
 		ibctransfertypes.StoreKey,
-		wasmtypes.StoreKey,
 		icahosttypes.StoreKey,
 		icacontrollertypes.StoreKey,
 		tokenfactorytypes.StoreKey,
 		packetforwardtypes.StoreKey,
 		ratelimittypes.StoreKey,
 		feemarkettypes.StoreKey,
+		wasmtypes.StoreKey,
+		ibcwasmtypes.StoreKey,
 	)
 
 	tkeys := storetypes.NewTransientStoreKeys(
@@ -791,6 +792,10 @@ func NewEnokiApp(
 	tmLightClientModule := ibctm.NewLightClientModule(appCodec, clientKeeper.GetStoreProvider())
 	clientKeeper.AddRoute(ibctm.ModuleName, &tmLightClientModule)
 
+	// Create WASM Light Client Stack
+	wasmLightClientModule := ibcwasm.NewLightClientModule(app.WasmClientKeeper, clientKeeper.GetStoreProvider())
+	clientKeeper.AddRoute(ibcwasmtypes.ModuleName, &wasmLightClientModule)
+
 	app.ModuleManager = module.NewManager(
 		genutil.NewAppModule(
 			app.AccountKeeper,
@@ -801,7 +806,6 @@ func NewEnokiApp(
 		auth.NewAppModule(appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts, app.GetSubspace(authtypes.ModuleName)),
 		vesting.NewAppModule(app.AccountKeeper, app.BankKeeper),
 		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper, app.GetSubspace(banktypes.ModuleName)),
-		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
 		gov.NewAppModule(appCodec, &app.GovKeeper, app.AccountKeeper, app.BankKeeper, app.GetSubspace(govtypes.ModuleName)),
 		mint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, nil, app.GetSubspace(minttypes.ModuleName)),
 		slashing.NewAppModule(
@@ -812,8 +816,11 @@ func NewEnokiApp(
 		staking.NewAppModule(appCodec, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.GetSubspace(stakingtypes.ModuleName)),
 		upgrade.NewAppModule(app.UpgradeKeeper, app.AccountKeeper.AddressCodec()),
 		evidence.NewAppModule(app.EvidenceKeeper),
-		params.NewAppModule(app.ParamsKeeper),
+		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
 		authzmodule.NewAppModule(appCodec, app.AuthzKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
+		ibc.NewAppModule(app.IBCKeeper),
+		ibcwasm.NewAppModule(app.WasmClientKeeper),
+		params.NewAppModule(app.ParamsKeeper),
 		groupmodule.NewAppModule(appCodec, app.GroupKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		consensus.NewAppModule(appCodec, app.ConsensusParamsKeeper),
 		circuit.NewAppModule(appCodec, app.CircuitKeeper),
@@ -822,14 +829,13 @@ func NewEnokiApp(
 			app.StakingKeeper,
 			app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), app.GetSubspace(wasmtypes.ModuleName),
 		),
-		feemarket.NewAppModule(appCodec, *app.FeeMarketKeeper),
-		ibc.NewAppModule(app.IBCKeeper),
 		transfer.NewAppModule(app.TransferKeeper),
 		ica.NewAppModule(&app.ICAControllerKeeper, &app.ICAHostKeeper),
-		ibctm.NewAppModule(tmLightClientModule),
-		// custom
 		packetforward.NewAppModule(app.PacketForwardKeeper, app.GetSubspace(packetforwardtypes.ModuleName)),
 		ratelimit.NewAppModule(appCodec, app.RatelimitKeeper),
+		ibctm.NewAppModule(tmLightClientModule),
+		// custom
+		feemarket.NewAppModule(appCodec, *app.FeeMarketKeeper),
 		tokenfactory.NewAppModule(app.TokenFactoryKeeper, app.AccountKeeper, app.BankKeeper, app.GetSubspace(tokenfactorytypes.ModuleName)),
 	)
 
@@ -943,6 +949,7 @@ func NewEnokiApp(
 		ibcexported.ModuleName,
 		icatypes.ModuleName,
 		wasmtypes.ModuleName, // wasm after ibc transfer
+		ibcwasmtypes.ModuleName,
 		tokenfactorytypes.ModuleName,
 		packetforwardtypes.ModuleName,
 		ratelimittypes.ModuleName,
@@ -990,12 +997,6 @@ func NewEnokiApp(
 	app.MountTransientStores(tkeys)
 	app.MountMemoryStores(memKeys)
 
-	// initialize BaseApp
-	app.SetInitChainer(app.InitChainer)
-	app.SetPreBlocker(app.PreBlocker)
-	app.SetBeginBlocker(app.BeginBlocker)
-	app.SetEndBlocker(app.EndBlocker)
-
 	antehandler, err := enokiante.NewAnteHandler(
 		enokiante.HandlerOptions{
 			AccountKeeper:         &app.AccountKeeper,
@@ -1016,17 +1017,11 @@ func NewEnokiApp(
 
 	app.SetAnteHandler(antehandler)
 
-	// must be before Loading version
-	// requires the snapshot store to be created and registered as a BaseAppOption
-	// see cmd/enokid/root.go
-	if manager := app.SnapshotManager(); manager != nil {
-		err := manager.RegisterExtensions(
-			wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper),
-		)
-		if err != nil {
-			panic(fmt.Errorf("failed to register snapshot extension: %s", err))
-		}
-	}
+	// initialize BaseApp
+	app.SetInitChainer(app.InitChainer)
+	app.SetPreBlocker(app.PreBlocker)
+	app.SetBeginBlocker(app.BeginBlocker)
+	app.SetEndBlocker(app.EndBlocker)
 
 	// In v0.46, the SDK introduces _postHandlers_. PostHandlers are like
 	// antehandlers, but are run _after_ the `runMsgs` execution. They are also
@@ -1042,6 +1037,19 @@ func NewEnokiApp(
 	// likely to be a state-machine breaking change, which needs a coordinated
 	// upgrade.
 	app.setPostHandler()
+
+	// must be before Loading version
+	// requires the snapshot store to be created and registered as a BaseAppOption
+	// see cmd/enokid/root.go
+	if manager := app.SnapshotManager(); manager != nil {
+		err := manager.RegisterExtensions(
+			wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper),
+			ibcwasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmClientKeeper),
+		)
+		if err != nil {
+			panic(fmt.Errorf("failed to register snapshot extension: %s", err))
+		}
+	}
 
 	// At startup, after all modules have been registered, check that all proto
 	// annotations are correct.
@@ -1066,6 +1074,10 @@ func NewEnokiApp(
 
 		if err := app.WasmKeeper.InitializePinnedCodes(ctx); err != nil {
 			panic(fmt.Sprintf("failed initialize pinned codes %s", err))
+		}
+
+		if err := app.WasmClientKeeper.InitializePinnedCodes(ctx); err != nil {
+			panic(fmt.Sprintf("wasmlckeeper failed initialize pinned codes %s", err))
 		}
 
 	}
