@@ -331,8 +331,6 @@ func NewEnokiApp(
 	// }
 	// baseAppOptions = append(baseAppOptions, voteExtOp)
 
-	// baseAppOptions = append(baseAppOptions)
-
 	bApp := baseapp.NewBaseApp(appName, logger, db, txConfig.TxDecoder(), baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)
 	bApp.SetVersion(version.Version)
