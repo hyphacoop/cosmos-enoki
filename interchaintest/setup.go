@@ -10,7 +10,6 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/strangelove-ventures/interchaintest/v8/testutil"
-	tokenfactory "github.com/strangelove-ventures/tokenfactory/x/tokenfactory/types"
 	"github.com/tidwall/gjson"
 
 	sdkmath "cosmossdk.io/math"
@@ -46,9 +45,6 @@ var (
 		cosmos.NewGenesisKV("app_state.gov.params.max_deposit_period", MaxDepositPeriod),
 		cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.denom", Denom),
 		cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.amount", "1"),
-		// tokenfactory: set create cost in set denom or in gas usage.
-		cosmos.NewGenesisKV("app_state.tokenfactory.params.denom_creation_fee", nil),
-		cosmos.NewGenesisKV("app_state.tokenfactory.params.denom_creation_gas_consume", 1), // cost 1 gas to create a new denom
 		// feemarket: set params and starting state
 		cosmos.NewGenesisKV("app_state.feemarket.params.min_base_gas_price", "0.002"),
 		cosmos.NewGenesisKV("app_state.feemarket.params.max_block_utilization", FeeMarketMaxGas),
@@ -105,7 +101,6 @@ func GetEncodingConfig() *moduletestutil.TestEncodingConfig {
 	cfg := cosmos.DefaultEncoding()
 	// TODO: add encoding types here for the modules you want to use
 	wasm.RegisterInterfaces(cfg.InterfaceRegistry)
-	tokenfactory.RegisterInterfaces(cfg.InterfaceRegistry)
 	return &cfg
 }
 
