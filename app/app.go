@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"sync"
 
 	wasmvm "github.com/CosmWasm/wasmvm/v2"
 	abci "github.com/cometbft/cometbft/abci/types"
@@ -54,10 +53,6 @@ import (
 	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 	"github.com/spf13/cast"
-	tokenfactory "github.com/strangelove-ventures/tokenfactory/x/tokenfactory"
-	tokenfactorybindings "github.com/strangelove-ventures/tokenfactory/x/tokenfactory/bindings"
-	tokenfactorykeeper "github.com/strangelove-ventures/tokenfactory/x/tokenfactory/keeper"
-	tokenfactorytypes "github.com/strangelove-ventures/tokenfactory/x/tokenfactory/types"
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
@@ -117,6 +112,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/consensus"
 	consensusparamkeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
 	consensusparamtypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
+	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
@@ -125,6 +121,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"github.com/cosmos/cosmos-sdk/x/group"
 	groupkeeper "github.com/cosmos/cosmos-sdk/x/group/keeper"
@@ -166,7 +163,6 @@ var capabilities = strings.Join(
 		"staking",
 		"stargate",
 		"cosmwasm_1_1", "cosmwasm_1_2", "cosmwasm_1_3", "cosmwasm_1_4",
-		"token_factory",
 	}, ",")
 
 // These constants are derived from the above variables.
@@ -199,19 +195,17 @@ var (
 
 // module account permissions
 var maccPerms = map[string][]string{
-	authtypes.FeeCollectorName:     nil,
-	distrtypes.ModuleName:          nil,
-	minttypes.ModuleName:           {authtypes.Minter},
-	stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
-	stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
-	govtypes.ModuleName:            {authtypes.Burner},
-	// non sdk modules
-	ibctransfertypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
+	authtypes.FeeCollectorName:      nil,
+	distrtypes.ModuleName:           nil,
 	icatypes.ModuleName:             nil,
+	minttypes.ModuleName:            {authtypes.Minter},
+	stakingtypes.BondedPoolName:     {authtypes.Burner, authtypes.Staking},
+	stakingtypes.NotBondedPoolName:  {authtypes.Burner, authtypes.Staking},
+	govtypes.ModuleName:             {authtypes.Burner},
+	ibctransfertypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
 	wasmtypes.ModuleName:            {authtypes.Burner},
 	feemarkettypes.ModuleName:       nil,
 	feemarkettypes.FeeCollectorName: nil,
-	tokenfactorytypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 }
 
 var (
@@ -263,7 +257,6 @@ type EnokiApp struct {
 
 	// Custom
 	WasmKeeper          wasmkeeper.Keeper
-	TokenFactoryKeeper  tokenfactorykeeper.Keeper
 	PacketForwardKeeper *packetforwardkeeper.Keeper
 	RatelimitKeeper     ratelimitkeeper.Keeper
 
@@ -278,7 +271,7 @@ type EnokiApp struct {
 
 	// module configurator
 	configurator module.Configurator
-	once         sync.Once
+	// once         sync.Once
 }
 
 // NewEnokiApp returns a reference to an initialized EnokiApp.
@@ -359,7 +352,6 @@ func NewEnokiApp(
 		ibctransfertypes.StoreKey,
 		icahosttypes.StoreKey,
 		icacontrollertypes.StoreKey,
-		tokenfactorytypes.StoreKey,
 		packetforwardtypes.StoreKey,
 		ratelimittypes.StoreKey,
 		feemarkettypes.StoreKey,
@@ -448,15 +440,6 @@ func NewEnokiApp(
 		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ValidatorAddrPrefix()),
 		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ConsensusAddrPrefix()),
 	)
-	app.MintKeeper = mintkeeper.NewKeeper(
-		appCodec,
-		runtime.NewKVStoreService(keys[minttypes.StoreKey]),
-		app.StakingKeeper,
-		app.AccountKeeper,
-		app.BankKeeper,
-		authtypes.FeeCollectorName,
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-	)
 	app.DistrKeeper = distrkeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[distrtypes.StoreKey]),
@@ -473,6 +456,15 @@ func NewEnokiApp(
 		runtime.NewKVStoreService(keys[slashingtypes.StoreKey]),
 		app.StakingKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+
+	// register the staking hooks
+	// NOTE: stakingKeeper above is passed by reference, so that it will contain these hooks
+	app.StakingKeeper.SetHooks(
+		stakingtypes.NewMultiStakingHooks(
+			app.DistrKeeper.Hooks(),
+			app.SlashingKeeper.Hooks(),
+		),
 	)
 
 	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, runtime.NewKVStoreService(keys[feegrant.StoreKey]), app.AccountKeeper)
@@ -516,15 +508,6 @@ func NewEnokiApp(
 		homePath,
 		app.BaseApp,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-	)
-
-	// register the staking hooks
-	// NOTE: stakingKeeper above is passed by reference, so that it will contain these hooks
-	app.StakingKeeper.SetHooks(
-		stakingtypes.NewMultiStakingHooks(
-			app.DistrKeeper.Hooks(),
-			app.SlashingKeeper.Hooks(),
-		),
 	)
 
 	app.FeeMarketKeeper = feemarketkeeper.NewKeeper(
@@ -596,6 +579,15 @@ func NewEnokiApp(
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
+	app.MintKeeper = mintkeeper.NewKeeper(
+		appCodec,
+		runtime.NewKVStoreService(keys[minttypes.StoreKey]),
+		app.StakingKeeper,
+		app.AccountKeeper,
+		app.BankKeeper,
+		authtypes.FeeCollectorName,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
 	// Set legacy router for backwards compatibility with gov v1beta1
 	govKeeper.SetLegacyRouter(govRouter)
 
@@ -628,25 +620,6 @@ func NewEnokiApp(
 		app.GRPCQueryRouter(),
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
-
-	// Create the tokenfactory keeper
-	app.TokenFactoryKeeper = tokenfactorykeeper.NewKeeper(
-		appCodec,
-		app.keys[tokenfactorytypes.StoreKey],
-		maccPerms,
-		app.AccountKeeper,
-		app.BankKeeper,
-		app.DistrKeeper,
-		[]string{
-			tokenfactorytypes.EnableBurnFrom,
-			tokenfactorytypes.EnableForceTransfer,
-			tokenfactorytypes.EnableSetMetadata,
-			tokenfactorytypes.EnableCommunityPoolFeeFunding,
-		},
-		tokenfactorykeeper.DefaultIsSudoAdminFunc,
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-	)
-	wasmOpts = append(wasmOpts, tokenfactorybindings.RegisterCustomPlugins(app.BankKeeper, &app.TokenFactoryKeeper)...)
 
 	// Create the ratelimit keeper
 	app.RatelimitKeeper = *ratelimitkeeper.NewKeeper(
@@ -757,6 +730,8 @@ func NewEnokiApp(
 
 	// Create ICAController Stack
 	var icaControllerStack porttypes.IBCModule = icacontroller.NewIBCMiddleware(app.ICAControllerKeeper)
+	icaControllerStack = ibccallbacks.NewIBCMiddleware(icaControllerStack, app.IBCKeeper.ChannelKeeper,
+		wasmStackIBCHandler, MaxIBCCallbackGas)
 	icaICS4Wrapper := icaControllerStack.(porttypes.ICS4Wrapper)
 	app.ICAControllerKeeper.WithICS4Wrapper(icaICS4Wrapper)
 	wasmStack := wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper, app.IBCKeeper.ChannelKeeper)
@@ -824,7 +799,6 @@ func NewEnokiApp(
 		groupmodule.NewAppModule(appCodec, app.GroupKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		consensus.NewAppModule(appCodec, app.ConsensusParamsKeeper),
 		circuit.NewAppModule(appCodec, app.CircuitKeeper),
-		// non sdk modules
 		wasm.NewAppModule(appCodec, &app.WasmKeeper,
 			app.StakingKeeper,
 			app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), app.GetSubspace(wasmtypes.ModuleName),
@@ -833,10 +807,8 @@ func NewEnokiApp(
 		ica.NewAppModule(&app.ICAControllerKeeper, &app.ICAHostKeeper),
 		packetforward.NewAppModule(app.PacketForwardKeeper, app.GetSubspace(packetforwardtypes.ModuleName)),
 		ratelimit.NewAppModule(appCodec, app.RatelimitKeeper),
-		ibctm.NewAppModule(tmLightClientModule),
-		// custom
 		feemarket.NewAppModule(appCodec, *app.FeeMarketKeeper),
-		tokenfactory.NewAppModule(app.TokenFactoryKeeper, app.AccountKeeper, app.BankKeeper, app.GetSubspace(tokenfactorytypes.ModuleName)),
+		ibctm.NewAppModule(tmLightClientModule),
 	)
 
 	// BasicModuleManager defines the module BasicManager is in charge of setting up basic,
@@ -862,22 +834,22 @@ func NewEnokiApp(
 	// NOTE: staking module is required if HistoricalEntries param > 0
 	// NOTE: capability module's beginblocker must come before any modules using capabilities (e.g. IBC)
 	app.ModuleManager.SetOrderBeginBlockers(
+		stakingtypes.ModuleName,
 		minttypes.ModuleName,
-
 		distrtypes.ModuleName,
 		slashingtypes.ModuleName,
 		evidencetypes.ModuleName,
-		stakingtypes.ModuleName,
 		authtypes.ModuleName,
 		banktypes.ModuleName,
 		govtypes.ModuleName,
+		crisistypes.ModuleName,
 		// additional non simd modules
 		ibcexported.ModuleName,
 		ibctransfertypes.ModuleName,
 		icatypes.ModuleName,
-		tokenfactorytypes.ModuleName,
 		packetforwardtypes.ModuleName,
 		ratelimittypes.ModuleName,
+		genutiltypes.ModuleName,
 		authz.ModuleName,
 		feegrant.ModuleName,
 		paramstypes.ModuleName,
@@ -889,6 +861,7 @@ func NewEnokiApp(
 	)
 
 	app.ModuleManager.SetOrderEndBlockers(
+		crisistypes.ModuleName,
 		govtypes.ModuleName,
 		stakingtypes.ModuleName,
 		// additional non simd modules
@@ -896,7 +869,6 @@ func NewEnokiApp(
 		ibcexported.ModuleName,
 		ibctransfertypes.ModuleName,
 		icatypes.ModuleName,
-		tokenfactorytypes.ModuleName,
 		packetforwardtypes.ModuleName,
 		ratelimittypes.ModuleName,
 		authtypes.ModuleName,
@@ -929,30 +901,30 @@ func NewEnokiApp(
 		authtypes.ModuleName,
 		banktypes.ModuleName,
 		distrtypes.ModuleName,
+		govtypes.ModuleName,
 		stakingtypes.ModuleName,
 		slashingtypes.ModuleName,
-		govtypes.ModuleName,
 		minttypes.ModuleName,
 		genutiltypes.ModuleName,
+		ibctransfertypes.ModuleName,
+		ibcexported.ModuleName,
+		icatypes.ModuleName,
 		evidencetypes.ModuleName,
 		authz.ModuleName,
 		feegrant.ModuleName,
+		packetforwardtypes.ModuleName,
+		ratelimittypes.ModuleName,
 		group.ModuleName,
 		paramstypes.ModuleName,
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
+		feemarkettypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		circuittypes.ModuleName,
-		feemarkettypes.ModuleName,
 		// additional non simd modules
-		ibctransfertypes.ModuleName,
-		ibcexported.ModuleName,
-		icatypes.ModuleName,
 		wasmtypes.ModuleName, // wasm after ibc transfer
 		ibcwasmtypes.ModuleName,
-		tokenfactorytypes.ModuleName,
-		packetforwardtypes.ModuleName,
-		ratelimittypes.ModuleName,
+		crisistypes.ModuleName,
 	}
 	app.ModuleManager.SetOrderInitGenesis(genesisModuleOrder...)
 	app.ModuleManager.SetOrderExportGenesis(genesisModuleOrder...)
@@ -1004,6 +976,7 @@ func NewEnokiApp(
 			FeegrantKeeper:        app.FeeGrantKeeper,
 			SignModeHandler:       txConfig.SignModeHandler(),
 			SigGasConsumer:        ante.DefaultSigVerificationGasConsumer,
+			Codec:                 appCodec,
 			IBCKeeper:             app.IBCKeeper,
 			WasmConfig:            &wasmConfig,
 			CircuitKeeper:         &app.CircuitKeeper,
@@ -1016,13 +989,6 @@ func NewEnokiApp(
 	}
 
 	app.SetAnteHandler(antehandler)
-
-	// initialize BaseApp
-	app.SetInitChainer(app.InitChainer)
-	app.SetPreBlocker(app.PreBlocker)
-	app.SetBeginBlocker(app.BeginBlocker)
-	app.SetEndBlocker(app.EndBlocker)
-
 	// In v0.46, the SDK introduces _postHandlers_. PostHandlers are like
 	// antehandlers, but are run _after_ the `runMsgs` execution. They are also
 	// defined as a chain, and have the same signature as antehandlers.
@@ -1037,6 +1003,12 @@ func NewEnokiApp(
 	// likely to be a state-machine breaking change, which needs a coordinated
 	// upgrade.
 	app.setPostHandler()
+
+	// initialize BaseApp
+	app.SetInitChainer(app.InitChainer)
+	app.SetPreBlocker(app.PreBlocker)
+	app.SetBeginBlocker(app.BeginBlocker)
+	app.SetEndBlocker(app.EndBlocker)
 
 	// must be before Loading version
 	// requires the snapshot store to be created and registered as a BaseAppOption
@@ -1069,7 +1041,7 @@ func NewEnokiApp(
 			panic(fmt.Errorf("error loading last version: %w", err))
 		}
 
-		ctx := app.BaseApp.NewUncachedContext(true, tmproto.Header{})
+		ctx := app.NewUncachedContext(true, tmproto.Header{})
 		_ = ctx
 
 		if err := app.WasmKeeper.InitializePinnedCodes(ctx); err != nil {
@@ -1083,27 +1055,6 @@ func NewEnokiApp(
 	}
 
 	return app
-}
-
-func (app *EnokiApp) FinalizeBlock(req *abci.RequestFinalizeBlock) (*abci.ResponseFinalizeBlock, error) {
-	// when skipping sdk 47 for sdk 50, the upgrade handler is called too late in BaseApp
-	// this is a hack to ensure that the migration is executed when needed and not panics
-	app.once.Do(func() {
-		ctx := app.NewUncachedContext(false, tmproto.Header{})
-		if _, err := app.ConsensusParamsKeeper.Params(ctx, &consensusparamtypes.QueryParamsRequest{}); err != nil {
-			// prevents panic: consensus key is nil: collections: not found: key 'no_key' of type github.com/cosmos/gogoproto/tendermint.types.ConsensusParams
-			// sdk 47:
-			// Migrate Tendermint consensus parameters from x/params module to a dedicated x/consensus module.
-			// see https://github.com/cosmos/cosmos-sdk/blob/v0.47.0/simapp/upgrades.go#L66
-			baseAppLegacySS := app.GetSubspace(baseapp.Paramspace)
-			err := baseapp.MigrateParams(sdk.UnwrapSDKContext(ctx), baseAppLegacySS, app.ConsensusParamsKeeper.ParamsStore)
-			if err != nil {
-				panic(err)
-			}
-		}
-	})
-
-	return app.BaseApp.FinalizeBlock(req)
 }
 
 func NewPostHandler(options PostHandlerOptions) (sdk.PostHandler, error) {
@@ -1223,7 +1174,7 @@ func (app *EnokiApp) AutoCliOpts() autocli.AppOptions {
 // DefaultGenesis returns a default genesis from the registered AppModuleBasic's.
 func (a *EnokiApp) DefaultGenesis() map[string]json.RawMessage {
 	genesis := a.BasicModuleManager.DefaultGenesis(a.appCodec)
-	genesis[feemarkettypes.ModuleName] = a.appCodec.MustMarshalJSON(feemarkettypes.DefaultGenesisState())
+	// genesis[feemarkettypes.ModuleName] = a.appCodec.MustMarshalJSON(feemarkettypes.DefaultGenesisState())
 	return genesis
 }
 
@@ -1347,13 +1298,13 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	// required for testing finalized block migration
 	paramsKeeper.Subspace(baseapp.Paramspace)
 
-	paramsKeeper.Subspace(authtypes.ModuleName)
-	paramsKeeper.Subspace(banktypes.ModuleName)
-	paramsKeeper.Subspace(stakingtypes.ModuleName)
-	paramsKeeper.Subspace(minttypes.ModuleName)
-	paramsKeeper.Subspace(distrtypes.ModuleName)
-	paramsKeeper.Subspace(slashingtypes.ModuleName)
-	paramsKeeper.Subspace(govtypes.ModuleName)
+	paramsKeeper.Subspace(authtypes.ModuleName).WithKeyTable(authtypes.ParamKeyTable())
+	paramsKeeper.Subspace(stakingtypes.ModuleName).WithKeyTable(stakingtypes.ParamKeyTable())
+	paramsKeeper.Subspace(banktypes.ModuleName).WithKeyTable(banktypes.ParamKeyTable())
+	paramsKeeper.Subspace(minttypes.ModuleName).WithKeyTable(minttypes.ParamKeyTable())
+	paramsKeeper.Subspace(distrtypes.ModuleName).WithKeyTable(distrtypes.ParamKeyTable())
+	paramsKeeper.Subspace(slashingtypes.ModuleName).WithKeyTable(slashingtypes.ParamKeyTable())
+	paramsKeeper.Subspace(govtypes.ModuleName).WithKeyTable(govv1.ParamKeyTable())
 
 	// register the IBC key tables for legacy param subspaces
 	keyTable := ibcclienttypes.ParamKeyTable()
@@ -1364,9 +1315,8 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(icahosttypes.SubModuleName).WithKeyTable(icahosttypes.ParamKeyTable())
 
 	paramsKeeper.Subspace(wasmtypes.ModuleName)
-	paramsKeeper.Subspace(tokenfactorytypes.ModuleName)
 	paramsKeeper.Subspace(packetforwardtypes.ModuleName)
-	paramsKeeper.Subspace(ratelimittypes.ModuleName)
+	paramsKeeper.Subspace(ratelimittypes.ModuleName).WithKeyTable(ratelimittypes.ParamKeyTable())
 
 	return paramsKeeper
 }

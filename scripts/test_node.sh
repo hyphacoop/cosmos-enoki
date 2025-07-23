@@ -27,6 +27,7 @@ export GRPC=${GRPC:-"9090"}
 export GRPC_WEB=${GRPC_WEB:-"9091"}
 export ROSETTA=${ROSETTA:-"8080"}
 export BLOCK_TIME=${BLOCK_TIME:-"5s"}
+export SNAPSHOT_INTERVAL=${SNAPSHOT_INTERVAL:-100}
 
 # if which binary does not exist, install it
 if [ -z `which $BINARY` ]; then
@@ -89,11 +90,6 @@ from_scratch () {
   update_test_genesis '.app_state["gov"]["params"]["voting_period"]="30s"'
   update_test_genesis '.app_state["gov"]["params"]["expedited_voting_period"]="15s"'
 
-  update_test_genesis `printf '.app_state["evm"]["params"]["evm_denom"]="%s"' $DENOM`
-  update_test_genesis '.app_state["evm"]["params"]["active_static_precompiles"]=["0x0000000000000000000000000000000000000100","0x0000000000000000000000000000000000000400","0x0000000000000000000000000000000000000800","0x0000000000000000000000000000000000000801","0x0000000000000000000000000000000000000802","0x0000000000000000000000000000000000000803","0x0000000000000000000000000000000000000804","0x0000000000000000000000000000000000000805"]'
-  update_test_genesis '.app_state["erc20"]["params"]["native_precompiles"]=["0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"]' # https://eips.ethereum.org/EIPS/eip-7528
-  update_test_genesis `printf '.app_state["erc20"]["token_pairs"]=[{contract_owner:1,erc20_address:"0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",denom:"%s",enabled:true}]' $DENOM`
-
   # staking
   update_test_genesis `printf '.app_state["staking"]["params"]["bond_denom"]="%s"' $DENOM`
   update_test_genesis '.app_state["staking"]["params"]["min_commission_rate"]="0.050000000000000000"'
@@ -102,12 +98,9 @@ from_scratch () {
   update_test_genesis `printf '.app_state["mint"]["params"]["mint_denom"]="%s"' $DENOM`
 
   ## abci
-  update_test_genesis '.consensus["params"]["abci"]["vote_extensions_enable_height"]="1"'
+  update_test_genesis '.consensus["params"]["abci"]["vote_extensions_enable_height"]="0"'
 
   # === CUSTOM MODULES ===
-  # tokenfactory
-  update_test_genesis '.app_state["tokenfactory"]["params"]["denom_creation_fee"]=[]'
-  update_test_genesis '.app_state["tokenfactory"]["params"]["denom_creation_gas_consume"]=100000'
 
   # feemarket 
   update_test_genesis `printf '.app_state["feemarket"]["params"]["fee_denom"]="%s"' $DENOM`
@@ -142,7 +135,7 @@ fi
 echo "Starting node..."
 
 # Opens the RPC endpoint to outside connections
-sed -i -e 's/laddr = "tcp:\/\/127.0.0.1:26657"/c\laddr = "tcp:\/\/0.0.0.0:'$RPC'"/g' $HOME_DIR/config/config.toml
+sed -i -e 's|laddr = "tcp://127.0.0.1:26657"|laddr = "tcp://0.0.0.0:'$RPC'"|g' $HOME_DIR/config/config.toml
 sed -i -e 's/cors_allowed_origins = \[\]/cors_allowed_origins = \["\*"\]/g' $HOME_DIR/config/config.toml
 
 # REST endpoint
@@ -163,5 +156,13 @@ sed -i -e 's/address = ":8080"/address = "0.0.0.0:'$ROSETTA'"/g' $HOME_DIR/confi
 
 # Faster blocks
 sed -i -e 's/timeout_commit = "5s"/timeout_commit = "'$BLOCK_TIME'"/g' $HOME_DIR/config/config.toml
+
+# Enable state sync snapshots
+echo "> Snapshot internal: $SNAPSHOT_INTERVAL"
+sed -i -e 's|snapshot-interval = 0|snapshot-interval = '$SNAPSHOT_INTERVAL'|g' $HOME_DIR/config/app.toml
+
+# Enable duplicate IP connections
+sed -i -e 's|allow_duplicate_ip = false|allow_duplicate_ip = true|g' $HOME_DIR/config/config.toml
+
 
 $BINARY start --pruning=nothing  --minimum-gas-prices=0$DENOM --rpc.laddr="tcp://0.0.0.0:$RPC" --home $HOME_DIR

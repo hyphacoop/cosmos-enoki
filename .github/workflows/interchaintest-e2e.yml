@@ -85,7 +85,6 @@ jobs:
         test:
           - "ictest-basic"
           - "ictest-wasm"
-          - "ictest-tokenfactory"
           - "ictest-ibc"  #
           - "ictest-packetforward"  #
           - "ictest-ratelimit"  #

@@ -40,7 +40,7 @@ jobs:
           echo "> enokid service status:"
           systemctl status enokid
           echo "> Sync status:"
-          curl -s $RPC_ENDPOINT/status | jq -r '.result.sync_info'
+          curl -s http://127.0.0.1:26657/status | jq -r '.result.sync_info'
           chain_height=$(curl -s $RPC_ENDPOINT/block | jq -r '.result.block.header.height')
           node_height=$(curl -s http://127.0.0.1:26657/block | jq -r '.result.block.header.height')
           echo "> Chain height: $chain_height"

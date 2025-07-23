@@ -13,6 +13,7 @@ import (
 	circuitante "cosmossdk.io/x/circuit/ante"
 	txsigning "cosmossdk.io/x/tx/signing"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
@@ -28,8 +29,9 @@ type HandlerOptions struct {
 	FeegrantKeeper         ante.FeegrantKeeper
 	SignModeHandler        *txsigning.HandlerMap
 	SigGasConsumer         func(meter storetypes.GasMeter, sig signing.SignatureV2, params authtypes.Params) error
-	BankKeeper             feemarketante.BankKeeper
 	AccountKeeper          *authkeeper.AccountKeeper
+	BankKeeper             feemarketante.BankKeeper
+	Codec                  codec.BinaryCodec
 	IBCKeeper              *ibckeeper.Keeper
 	WasmConfig             *wasmtypes.NodeConfig
 	TXCounterStoreService  corestoretypes.KVStoreService
