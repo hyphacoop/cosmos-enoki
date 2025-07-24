@@ -1,12 +1,15 @@
 {
   "app_name": "enokid",
-  "app_version": "v1.0.0",
-  "genesis_time": "2025-05-12T14:38:42.459676941Z",
+  "app_version": "v1.2.0-rc1",
+  "genesis_time": "2025-07-23T23:56:54.81010583Z",
   "chain_id": "test-enoki-1",
   "initial_height": 1,
   "app_hash": null,
   "app_state": {
     "07-tendermint": null,
+    "08-wasm": {
+      "contracts": []
+    },
     "auth": {
       "params": {
         "max_memo_characters": "256",
@@ -90,12 +93,6 @@
       "disabled_type_urls": []
     },
     "consensus": null,
-    "crisis": {
-      "constant_fee": {
-        "denom": "uoki",
-        "amount": "1000"
-      }
-    },
     "distribution": {
       "params": {
         "community_tax": "0.020000000000000000",
@@ -137,7 +134,7 @@
         "distribute_fees": false
       },
       "state": {
-        "base_gas_price": "0.001000000000000000",
+        "base_gas_price": "1.000000000000000000",
         "learning_rate": "0.125000000000000000",
         "window": [
           "0"
@@ -179,6 +176,8 @@
             ],
             "memo": "073a66b646bc1fb5bb7fcc626f3209c8d0c46c25@192.168.5.188:26656",
             "timeout_height": "0",
+            "unordered": false,
+            "timeout_timestamp": null,
             "extension_options": [],
             "non_critical_extension_options": []
           },
@@ -336,10 +335,6 @@
         "blocks_per_year": "6311520"
       }
     },
-    "nft": {
-      "classes": [],
-      "entries": []
-    },
     "packetfowardmiddleware": {
       "in_flight_packets": {}
     },
@@ -359,7 +354,7 @@
     },
     "slashing": {
       "params": {
-        "signed_blocks_window": "48000",
+        "signed_blocks_window": "32000",
         "min_signed_per_window": "0.100000000000000000",
         "downtime_jail_duration": "600s",
         "slash_fraction_double_sign": "0.050000000000000000",
@@ -384,18 +379,6 @@
       "unbonding_delegations": [],
       "redelegations": [],
       "exported": false
-    },
-    "tokenfactory": {
-      "params": {
-        "denom_creation_fee": [
-          {
-            "denom": "uoki",
-            "amount": "10000000"
-          }
-        ],
-        "denom_creation_gas_consume": "2000000"
-      },
-      "factory_denoms": []
     },
     "transfer": {
       "port_id": "transfer",
@@ -426,8 +409,8 @@
   "consensus": {
     "params": {
       "block": {
-        "max_bytes": "2000000",
-        "max_gas": "10000000"
+        "max_bytes": "5000000",
+        "max_gas": "100000000"
       },
       "evidence": {
         "max_age_num_blocks": "100000",
