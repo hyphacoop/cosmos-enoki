@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v1.2.1
+
+2025-07-28
+
+* Bump Cosmos SDK to [v0.53.4](https://github.com/cosmos/cosmos-sdk/releases/tag/v0.53.4)
+* Switch tests to [cosmos/interchaintest](https://github.com/cosmos/interchaintest)
+
+
 ## v1.2.0
 
 2025-07-28
