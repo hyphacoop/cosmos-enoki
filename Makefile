@@ -211,7 +211,7 @@ ictest-full: ictest-clean ictest-basic ictest-ibc ictest-wasm ictest-packetforwa
 
 get-localic:
 	@echo "Installing local-interchain"
-	git clone --depth 1 --branch v8.7.0 https://github.com/strangelove-ventures/interchaintest.git interchaintest-downloader
+	git clone --depth 1 --branch v10.0.0 https://github.com/cosmos/interchaintest.git interchaintest-downloader
 	cd interchaintest-downloader/local-interchain && make install
 	@sleep 0.1
 	@echo ✅ local-interchain installed $(shell which local-ic)

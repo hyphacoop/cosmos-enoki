@@ -27,7 +27,7 @@ export GRPC=${GRPC:-"9090"}
 export GRPC_WEB=${GRPC_WEB:-"9091"}
 export ROSETTA=${ROSETTA:-"8080"}
 export BLOCK_TIME=${BLOCK_TIME:-"5s"}
-export SNAPSHOT_INTERVAL=${SNAPSHOT_INTERVAL:-100}
+export SNAPSHOT_INTERVAL=${SNAPSHOT_INTERVAL:-0}
 
 # if which binary does not exist, install it
 if [ -z `which $BINARY` ]; then
