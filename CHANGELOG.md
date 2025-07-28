@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.2.0
+
+2025-07-28
+
+* Bump Cosmos SDK to [v0.53.3](https://github.com/cosmos/cosmos-sdk/releases/tag/v0.53.3)
+
 ## v1.1.0
 
 2025-06-17
