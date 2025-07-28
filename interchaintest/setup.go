@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	ibcconntypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
-	"github.com/strangelove-ventures/interchaintest/v8"
-	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v8/ibc"
-	"github.com/strangelove-ventures/interchaintest/v8/testutil"
+	ibcconntypes "github.com/cosmos/ibc-go/v10/modules/core/03-connection/types"
+	"github.com/cosmos/interchaintest/v10"
+	"github.com/cosmos/interchaintest/v10/chain/cosmos"
+	"github.com/cosmos/interchaintest/v10/ibc"
+	"github.com/cosmos/interchaintest/v10/testutil"
 	"github.com/tidwall/gjson"
 
 	sdkmath "cosmossdk.io/math"
