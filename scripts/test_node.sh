@@ -102,6 +102,11 @@ from_scratch () {
 
   # === CUSTOM MODULES ===
 
+  # tokenfactory
+  update_test_genesis '.app_state["tokenfactory"]["params"]["denom_creation_fee"]=[]'
+  update_test_genesis '.app_state["tokenfactory"]["params"]["denom_creation_gas_consume"]=100000'
+
+
   # feemarket 
   update_test_genesis `printf '.app_state["feemarket"]["params"]["fee_denom"]="%s"' $DENOM`
   update_test_genesis '.app_state["feemarket"]["params"]["min_base_gas_price"]="0.005"'

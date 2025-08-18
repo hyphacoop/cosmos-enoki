@@ -53,6 +53,10 @@ import (
 	feemarketpost "github.com/skip-mev/feemarket/x/feemarket/post"
 	feemarkettypes "github.com/skip-mev/feemarket/x/feemarket/types"
 	"github.com/spf13/cast"
+	tokenfactory "github.com/strangelove-ventures/tokenfactory/x/tokenfactory"
+	tokenfactorybindings "github.com/strangelove-ventures/tokenfactory/x/tokenfactory/bindings"
+	tokenfactorykeeper "github.com/strangelove-ventures/tokenfactory/x/tokenfactory/keeper"
+	tokenfactorytypes "github.com/strangelove-ventures/tokenfactory/x/tokenfactory/types"
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
@@ -206,6 +210,7 @@ var maccPerms = map[string][]string{
 	wasmtypes.ModuleName:            {authtypes.Burner},
 	feemarkettypes.ModuleName:       nil,
 	feemarkettypes.FeeCollectorName: nil,
+	tokenfactorytypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 }
 
 var (
@@ -260,7 +265,8 @@ type EnokiApp struct {
 	PacketForwardKeeper *packetforwardkeeper.Keeper
 	RatelimitKeeper     ratelimitkeeper.Keeper
 
-	FeeMarketKeeper *feemarketkeeper.Keeper
+	FeeMarketKeeper    *feemarketkeeper.Keeper
+	TokenFactoryKeeper tokenfactorykeeper.Keeper
 
 	// the module manager
 	ModuleManager      *module.Manager
@@ -355,6 +361,7 @@ func NewEnokiApp(
 		packetforwardtypes.StoreKey,
 		ratelimittypes.StoreKey,
 		feemarkettypes.StoreKey,
+		tokenfactorytypes.StoreKey,
 		wasmtypes.StoreKey,
 		ibcwasmtypes.StoreKey,
 	)
@@ -517,6 +524,25 @@ func NewEnokiApp(
 		&feemarkettypes.TestDenomResolver{},
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
+
+	// Create the tokenfactory keeper
+	app.TokenFactoryKeeper = tokenfactorykeeper.NewKeeper(
+		appCodec,
+		app.keys[tokenfactorytypes.StoreKey],
+		maccPerms,
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.DistrKeeper,
+		[]string{
+			tokenfactorytypes.EnableBurnFrom,
+			tokenfactorytypes.EnableForceTransfer,
+			tokenfactorytypes.EnableSetMetadata,
+			tokenfactorytypes.EnableCommunityPoolFeeFunding,
+		},
+		tokenfactorykeeper.DefaultIsSudoAdminFunc,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+	wasmOpts = append(wasmOpts, tokenfactorybindings.RegisterCustomPlugins(app.BankKeeper, &app.TokenFactoryKeeper)...)
 
 	app.IBCKeeper = ibckeeper.NewKeeper(
 		appCodec,
@@ -808,6 +834,7 @@ func NewEnokiApp(
 		packetforward.NewAppModule(app.PacketForwardKeeper, app.GetSubspace(packetforwardtypes.ModuleName)),
 		ratelimit.NewAppModule(appCodec, app.RatelimitKeeper),
 		feemarket.NewAppModule(appCodec, *app.FeeMarketKeeper),
+		tokenfactory.NewAppModule(app.TokenFactoryKeeper, app.AccountKeeper, app.BankKeeper, app.GetSubspace(tokenfactorytypes.ModuleName)),
 		ibctm.NewAppModule(tmLightClientModule),
 	)
 
@@ -855,6 +882,7 @@ func NewEnokiApp(
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
 		feemarkettypes.ModuleName,
+		tokenfactorytypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		wasmtypes.ModuleName,
 		ibcwasmtypes.ModuleName,
@@ -883,6 +911,7 @@ func NewEnokiApp(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		feemarkettypes.ModuleName,
+		tokenfactorytypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		wasmtypes.ModuleName,
 		ibcwasmtypes.ModuleName,
@@ -919,6 +948,7 @@ func NewEnokiApp(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		feemarkettypes.ModuleName,
+		tokenfactorytypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		circuittypes.ModuleName,
 		// additional non simd modules
@@ -1239,6 +1269,7 @@ func (app *EnokiApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIC
 
 	// Register grpc-gateway routes for all modules.
 	app.BasicModuleManager.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
+	tokenfactory.NewAppModuleBasic().RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
 	// register swagger API from root so that other applications can override easily
 	if err := server.RegisterSwaggerAPI(apiSvr.ClientCtx, apiSvr.Router, apiConfig.Swagger); err != nil {
@@ -1305,7 +1336,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(distrtypes.ModuleName).WithKeyTable(distrtypes.ParamKeyTable())
 	paramsKeeper.Subspace(slashingtypes.ModuleName).WithKeyTable(slashingtypes.ParamKeyTable())
 	paramsKeeper.Subspace(govtypes.ModuleName).WithKeyTable(govv1.ParamKeyTable())
-
+	paramsKeeper.Subspace(tokenfactorytypes.ModuleName).WithKeyTable(tokenfactorytypes.ParamKeyTable())
 	// register the IBC key tables for legacy param subspaces
 	keyTable := ibcclienttypes.ParamKeyTable()
 	keyTable.RegisterParamSet(&ibcconnectiontypes.Params{})
