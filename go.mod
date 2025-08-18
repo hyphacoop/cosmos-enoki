@@ -49,6 +49,7 @@ require (
 	github.com/CosmWasm/wasmvm/v2 v2.2.4
 	github.com/cosmos/ibc-go/modules/light-clients/08-wasm/v10 v10.3.0
 	github.com/skip-mev/feemarket v1.1.1 // Replace with the latest version
+	github.com/strangelove-ventures/tokenfactory v0.50.7-wasmvm2
 )
 
 require (
@@ -128,6 +129,7 @@ require (
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
 	github.com/gogo/googleapis v1.4.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/gogo/status v1.1.0 // indirect
 	github.com/golang/glog v1.2.5 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
