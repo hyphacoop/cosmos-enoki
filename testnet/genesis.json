@@ -380,6 +380,18 @@
       "redelegations": [],
       "exported": false
     },
+    "tokenfactory": {
+      "params": {
+        "denom_creation_fee": [
+          {
+            "amount": "1000000",
+            "denom": "uoki"
+          }
+        ],
+        "denom_creation_gas_consume": 100000
+      },
+      "factory_denoms": []
+    },
     "transfer": {
       "port_id": "transfer",
       "denoms": [],
