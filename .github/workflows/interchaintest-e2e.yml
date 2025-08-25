@@ -89,6 +89,7 @@ jobs:
           - "ictest-packetforward"  #
           - "ictest-ratelimit"  #
           - "ictest-feemarket"
+          - "ictest-tokenfactory"
       fail-fast: false
 
     steps:

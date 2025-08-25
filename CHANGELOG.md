@@ -1,6 +1,11 @@
 # CHANGELOG
 
-## v1.2.1
+## v1.3.0
+
+2025-08-18
+
+* Add [tokenfactory](https://github.com/strangelove-ventures/tokenfactory) module
+
 
 2025-07-28
 
