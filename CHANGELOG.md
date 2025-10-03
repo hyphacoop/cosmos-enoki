@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.4.0
+
+2025-10-03
+
+* Add upgrade handler for the tokenfactory module
+
 ## v1.3.0
 
 2025-08-18
