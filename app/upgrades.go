@@ -7,10 +7,13 @@ import (
 	"github.com/hyphacoop/cosmos-enoki/app/upgrades/noop"
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
+	v1_4_0 "github.com/hyphacoop/cosmos-enoki/app/upgrades/v1_4_0"
 )
 
 // Upgrades list of chain upgrades
-var Upgrades = []upgrades.Upgrade{}
+var Upgrades = []upgrades.Upgrade{
+	v1_4_0.NewUpgrade(),
+}
 
 // RegisterUpgradeHandlers registers the chain upgrade handlers
 func (app *EnokiApp) RegisterUpgradeHandlers() {
@@ -24,10 +27,10 @@ func (app *EnokiApp) RegisterUpgradeHandlers() {
 		AccountKeeper:         &app.AccountKeeper,
 		ParamsKeeper:          &app.ParamsKeeper,
 		ConsensusParamsKeeper: &app.ConsensusParamsKeeper,
-		// CapabilityKeeper:      app.CapabilityKeeper,
-		IBCKeeper:   app.IBCKeeper,
-		Codec:       app.appCodec,
-		GetStoreKey: app.GetKey,
+		IBCKeeper:             app.IBCKeeper,
+		Codec:                 app.appCodec,
+		GetStoreKey:           app.GetKey,
+		TokenFactoryKeeper:    &app.TokenFactoryKeeper,
 	}
 
 	// register all upgrade handlers

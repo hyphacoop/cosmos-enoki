@@ -1,4 +1,5 @@
 # Shell testnet
+build/
 .enoki/
 .statesync*
 scripts/test_state*
