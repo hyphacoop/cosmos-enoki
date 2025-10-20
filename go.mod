@@ -47,7 +47,7 @@ require (
 
 require (
 	github.com/CosmWasm/wasmvm/v2 v2.2.4
-	github.com/cosmos/ibc-go/modules/light-clients/08-wasm/v10 v10.3.0
+	github.com/cosmos/ibc-go/modules/light-clients/08-wasm/v10 v10.4.0
 	github.com/skip-mev/feemarket v1.1.1 // Replace with the latest version
 	github.com/strangelove-ventures/tokenfactory v0.50.7-wasmvm2
 )
