@@ -7,7 +7,7 @@
 NODE_HOME=~/.enoki
 NODE_MONIKER=enoki-test
 SERVICE_NAME=enokid
-CHAIN_VERSION=v1.4.0-rc0
+CHAIN_VERSION=v1.5.0-rc0
 CHAIN_BINARY_URL=https://github.com/hyphacoop/cosmos-enoki/releases/download/$CHAIN_VERSION/enoki_${CHAIN_VERSION}_linux_amd64.tar.gz
 DENOM=uoki
 GAS_PRICE=0.001$DENOM
@@ -29,25 +29,25 @@ echo "> Adding binaries to path."
 mkdir -p $HOME/go/bin
 export PATH=$PATH:$HOME/go/bin
 
-echo "> Installing Enoki binary."
-echo "Installing go..."
-rm go*linux-amd64.tar.gz
-wget https://go.dev/dl/go1.23.8.linux-amd64.tar.gz
-sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.23.8.linux-amd64.tar.gz
-export PATH=$PATH:/usr/local/go/bin
-sudo apt install build-essential -y
-cd $HOME
-rm -rf cosmos-enoki
-git clone https://github.com/hyphacoop/cosmos-enoki.git
-pushd cosmos-enoki
-git checkout $CHAIN_VERSION
-make install
-popd
+# echo "> Installing Enoki binary."
+# echo "Installing go..."
+# rm go*linux-amd64.tar.gz
+# wget https://go.dev/dl/go1.23.8.linux-amd64.tar.gz
+# sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.23.8.linux-amd64.tar.gz
+# export PATH=$PATH:/usr/local/go/bin
+# sudo apt install build-essential -y
+# cd $HOME
+# rm -rf cosmos-enoki
+# git clone https://github.com/hyphacoop/cosmos-enoki.git
+# pushd cosmos-enoki
+# git checkout $CHAIN_VERSION
+# make install
+# popd
 
-# or download Linux amd64 (unsupported)
-# wget $CHAIN_BINARY_URL -O archived-release.tar.gz
-# tar -xzvf archived-release.tar.gz
-# cp $CHAIN_BINARY $HOME/go/bin
+echo "> Downloading Linux binary"
+wget $CHAIN_BINARY_URL -O archived-release.tar.gz
+tar -xzvf archived-release.tar.gz
+cp $CHAIN_BINARY $HOME/go/bin
 
 echo "> Initializing $NODE_HOME directory."
 rm -rf $NODE_HOME
