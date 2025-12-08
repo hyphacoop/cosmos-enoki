@@ -30,7 +30,7 @@ func CreateUpgradeHandler(
 	return func(c context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 		ctx := sdk.UnwrapSDKContext(c)
 
-		ctx.Logger().Info("Starting %s upgrade", UpgradeName)
+		ctx.Logger().Info("Starting upgrade", "name", UpgradeName)
 		// Add tokenfactory module to the version map since it's being added in this upgrade
 		// fromVM[tokenfactorytypes.ModuleName] = 1
 
@@ -40,7 +40,7 @@ func CreateUpgradeHandler(
 			return fromVM, errorsmod.Wrapf(err, "running module migrations")
 		}
 
-		ctx.Logger().Info("Upgrade %s complete", UpgradeName)
+		ctx.Logger().Info("Upgrade complete", "name", UpgradeName)
 		return fromVM, nil
 
 	}
