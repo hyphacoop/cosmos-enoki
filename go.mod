@@ -39,7 +39,7 @@ require (
 	github.com/cosmos/ibc-go/v10 v10.4.0
 	github.com/prometheus/client_golang v1.23.2
 	github.com/spf13/cast v1.10.0
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	google.golang.org/protobuf v1.36.10
