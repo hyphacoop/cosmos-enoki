@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/interchaintest/v10/chain/cosmos"
 	"github.com/cosmos/interchaintest/v10/ibc"
 	"github.com/cosmos/interchaintest/v10/testutil"
-	tokenfactory "github.com/strangelove-ventures/tokenfactory/x/tokenfactory/types"
+	tokenfactory "github.com/cosmos/tokenfactory/x/tokenfactory/types"
 	"github.com/tidwall/gjson"
 
 	sdkmath "cosmossdk.io/math"

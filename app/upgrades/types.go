@@ -3,7 +3,6 @@ package upgrades
 import (
 	"context"
 
-	// capabilitykeeper "github.com/cosmos/ibc-go/modules/capability/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 
 	storetypes "cosmossdk.io/store/types"
@@ -15,7 +14,7 @@ import (
 	consensusparamkeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
 
-	tokenfactorykeeper "github.com/strangelove-ventures/tokenfactory/x/tokenfactory/keeper"
+	tokenfactorykeeper "github.com/cosmos/tokenfactory/x/tokenfactory/keeper"
 )
 
 type AppKeepers struct {
@@ -24,9 +23,8 @@ type AppKeepers struct {
 	ConsensusParamsKeeper *consensusparamkeeper.Keeper
 	Codec                 codec.Codec
 	GetStoreKey           func(storeKey string) *storetypes.KVStoreKey
-	// CapabilityKeeper      *capabilitykeeper.Keeper
-	IBCKeeper          *ibckeeper.Keeper
-	TokenFactoryKeeper *tokenfactorykeeper.Keeper
+	IBCKeeper             *ibckeeper.Keeper
+	TokenFactoryKeeper    *tokenfactorykeeper.Keeper
 }
 type ModuleManager interface {
 	RunMigrations(ctx context.Context, cfg module.Configurator, fromVM module.VersionMap) (module.VersionMap, error)
