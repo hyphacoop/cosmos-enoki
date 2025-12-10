@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.6.0
+
+### DEPENDENCIES
+
+* Switch to [cosmos/tokenfactory](https://github.com/cosmos/tokenfactory) fork
+
 ## v1.5.0
 
 ### DEPENDENCIES
