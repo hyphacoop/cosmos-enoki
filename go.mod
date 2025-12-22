@@ -36,7 +36,7 @@ require (
 	github.com/cosmos/gogoproto v1.7.2
 	github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v10 v10.1.0
 	github.com/cosmos/ibc-apps/modules/rate-limiting/v10 v10.1.0
-	github.com/cosmos/ibc-go/v10 v10.4.0
+	github.com/cosmos/ibc-go/v10 v10.5.0
 	github.com/prometheus/client_golang v1.23.2
 	github.com/spf13/cast v1.10.0
 	github.com/spf13/cobra v1.10.2
