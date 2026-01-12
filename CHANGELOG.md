@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## UNRELEASED
+
+### DEPENDENCIES
+
+* Bump ibc-go to [v10.5.0](https://github.com/cosmos/ibc-go/releases/tag/v10.5.0)
+* Bump cometbft to [v0.38.20](https://github.com/cometbft/cometbft/releases/tag/v0.38.20)
+
 ## v1.6.0
 
 ### DEPENDENCIES
