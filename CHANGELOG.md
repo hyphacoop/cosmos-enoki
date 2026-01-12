@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## UNRELEASED
+## v1.7.0
 
 ### DEPENDENCIES
 
