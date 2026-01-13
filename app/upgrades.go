@@ -9,12 +9,14 @@ import (
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	v1_5_0 "github.com/hyphacoop/cosmos-enoki/app/upgrades/v1_5_0"
 	v1_6_0 "github.com/hyphacoop/cosmos-enoki/app/upgrades/v1_6_0"
+	v1_7_0 "github.com/hyphacoop/cosmos-enoki/app/upgrades/v1_7_0"
 )
 
 // Upgrades list of chain upgrades
 var Upgrades = []upgrades.Upgrade{
 	v1_5_0.NewUpgrade(),
 	v1_6_0.NewUpgrade(),
+	v1_7_0.NewUpgrade(),
 }
 
 // RegisterUpgradeHandlers registers the chain upgrade handlers
