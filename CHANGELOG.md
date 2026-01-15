@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## UNRELEASED
+
+### DEPENDENCIES
+
+* Bump wasmvm to [v2.3.1](https://github.com/CosmWasm/wasmvm/releases/tag/v2.3.1)
+
+
 ## v1.7.0
 
 ### DEPENDENCIES
