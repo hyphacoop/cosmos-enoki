@@ -21,7 +21,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.53.4
 	github.com/cosmos/ibc-go/v10 v10.5.0
 	github.com/cosmos/interchaintest/v10 v10.0.1
-	github.com/cosmos/tokenfactory v0.53.4
+	github.com/cosmos/tokenfactory v0.53.5
 	github.com/moby/moby v27.5.1+incompatible
 	github.com/stretchr/testify v1.11.1
 	github.com/tidwall/gjson v1.18.0
