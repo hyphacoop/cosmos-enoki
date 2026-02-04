@@ -2,6 +2,8 @@
 
 ## UNRELEASED
 
+## v1.8.0
+
 ### DEPENDENCIES
 
 * Bump wasmvm to [v2.3.1](https://github.com/CosmWasm/wasmvm/releases/tag/v2.3.1)
