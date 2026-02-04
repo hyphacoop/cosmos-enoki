@@ -40,8 +40,8 @@ func TestChainUpgradeCosmWasm(t *testing.T) {
 	client, network := interchaintest.DockerSetup(t)
 
 	// Create a chain spec with v1.6.0 as the pre-upgrade version
-	preUpgradeVersion := "v1.6.0"
-	postUpgradeVersion := "v1.7.0"
+	preUpgradeVersion := "v1.7.0"
+	postUpgradeVersion := "v1.8.0"
 
 	preUpgradeImage := ibc.NewDockerImage("enoki", preUpgradeVersion, "1025:1025")
 	postUpgradeImage := ibc.NewDockerImage("enoki", postUpgradeVersion, "1025:1025")
