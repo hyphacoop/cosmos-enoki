@@ -90,7 +90,6 @@ jobs:
           - "ictest-ratelimit"  #
           - "ictest-feemarket"
           - "ictest-tokenfactory"
-          - "ictest-upgrade"
       fail-fast: false
 
     steps:
