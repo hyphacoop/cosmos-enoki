@@ -23,7 +23,6 @@ var Upgrades = []upgrades.Upgrade{
 
 // RegisterUpgradeHandlers registers the chain upgrade handlers
 func (app *EnokiApp) RegisterUpgradeHandlers() {
-	// setupLegacyKeyTables(&app.ParamsKeeper)
 	if len(Upgrades) == 0 {
 		// always have a unique upgrade registered for the current version to test in system tests
 		Upgrades = append(Upgrades, noop.NewUpgrade(app.Version()))
@@ -31,7 +30,6 @@ func (app *EnokiApp) RegisterUpgradeHandlers() {
 
 	keepers := upgrades.AppKeepers{
 		AccountKeeper:         &app.AccountKeeper,
-		ParamsKeeper:          &app.ParamsKeeper,
 		ConsensusParamsKeeper: &app.ConsensusParamsKeeper,
 		IBCKeeper:             app.IBCKeeper,
 		Codec:                 app.appCodec,
