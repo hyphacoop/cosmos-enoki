@@ -1,7 +1,7 @@
 ARG IMG_TAG=latest
 
 # Compile the enokid binary
-FROM golang:1.23.8-alpine AS enokid-builder
+FROM golang:1.25.7-alpine AS enokid-builder
 WORKDIR /src/app/
 ENV PACKAGES="curl build-base git bash file linux-headers eudev-dev"
 RUN apk add --no-cache $PACKAGES
