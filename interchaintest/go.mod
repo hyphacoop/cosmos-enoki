@@ -1,8 +1,6 @@
 module github.com/hyphacoop/cosmos-enoki/interchaintest
 
-go 1.23.8
-
-toolchain go1.23.10
+go 1.25.7
 
 replace (
 	cosmossdk.io/core => cosmossdk.io/core v0.11.3

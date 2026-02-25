@@ -1,6 +1,6 @@
 module github.com/hyphacoop/cosmos-enoki
 
-go 1.23.8
+go 1.25.7
 
 replace (
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.2.0
