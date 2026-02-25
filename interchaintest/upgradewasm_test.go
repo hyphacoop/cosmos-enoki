@@ -15,7 +15,10 @@ package e2e
 //   3. Ensure Docker has sufficient resources (CPU, memory, disk space)
 //
 // Usage:
-//   go test -v -run TestChainUpgradeCosmWasm -timeout 15m
+// go test -v -run TestChainUpgradeCosmWasm -timeout 10m \
+//   -pre-upgrade-version v1.8.0 \
+//   -post-upgrade-version v1.9.0 \
+//   -upgrade-name v1.9.0
 
 import (
 	"context"
@@ -39,8 +42,8 @@ func TestChainUpgradeCosmWasm(t *testing.T) {
 	eRep := rep.RelayerExecReporter(t)
 	client, network := interchaintest.DockerSetup(t)
 
-	preUpgradeVersion := "v1.8.0"
-	postUpgradeVersion := "v1.9.0"
+	preUpgradeVersion := *flagPreUpgradeVersion
+	postUpgradeVersion := *flagPostUpgradeVersion
 
 	preUpgradeImage := ibc.NewDockerImage("enoki", preUpgradeVersion, "1025:1025")
 	postUpgradeImage := ibc.NewDockerImage("enoki", postUpgradeVersion, "1025:1025")
@@ -109,7 +112,7 @@ func TestChainUpgradeCosmWasm(t *testing.T) {
 	t.Log("⚙️  Submitting upgrade proposal...")
 
 	upgradeHeight := haltHeight
-	upgradeName := postUpgradeVersion
+	upgradeName := *flagUpgradeName
 
 	// Perform upgrade using helper functions
 	params := UpgradeParams{

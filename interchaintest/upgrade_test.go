@@ -17,8 +17,14 @@ package e2e
 //   - Ensure no stale interchaintest containers are running: docker ps -a
 //
 // Usage:
-//   go test -v -run TestChainUpgrade -timeout 10m
-//   go test -v -run TestChainUpgradeWithValidation -timeout 15m
+// go test -v -run TestChainUpgrade -timeout 10m \
+//   -pre-upgrade-version v1.8.0 \
+//   -post-upgrade-version v1.9.0 \
+//   -upgrade-name v1.9.0
+// go test -v -run TestChainUpgradeWithValidation -timeout 10m \
+//   -pre-upgrade-version v1.8.0 \
+//   -post-upgrade-version v1.9.0 \
+//   -upgrade-name v1.9.0
 
 import (
 	"context"
@@ -48,9 +54,9 @@ func TestChainUpgrade(t *testing.T) {
 	client, network := interchaintest.DockerSetup(t)
 
 	// Create a chain spec
-	preUpgradeVersion := "v1.8.0"
-	postUpgradeVersion := "v1.9.0"
-	upgradeName := "v1.9.0"
+	preUpgradeVersion := *flagPreUpgradeVersion
+	postUpgradeVersion := *flagPostUpgradeVersion
+	upgradeName := *flagUpgradeName
 
 	preUpgradeImage := ibc.NewDockerImage("enoki", preUpgradeVersion, "1025:1025")
 	postUpgradeImage := ibc.NewDockerImage("enoki", postUpgradeVersion, "1025:1025")
@@ -116,8 +122,8 @@ func TestChainUpgradeWithValidation(t *testing.T) {
 	eRep := rep.RelayerExecReporter(t)
 	client, network := interchaintest.DockerSetup(t)
 
-	preUpgradeVersion := "v1.8.0"
-	postUpgradeVersion := "v1.9.0"
+	preUpgradeVersion := *flagPreUpgradeVersion
+	postUpgradeVersion := *flagPostUpgradeVersion
 
 	preUpgradeImage := ibc.NewDockerImage("enoki", preUpgradeVersion, "1025:1025")
 	postUpgradeImage := ibc.NewDockerImage("enoki", postUpgradeVersion, "1025:1025")
@@ -183,7 +189,7 @@ func TestChainUpgradeWithValidation(t *testing.T) {
 	t.Log("⚙️  Submitting upgrade proposal...")
 
 	upgradeHeight := haltHeight
-	upgradeName := postUpgradeVersion
+	upgradeName := *flagUpgradeName
 
 	upgradeParams := UpgradeParams{
 		UpgradeName:        upgradeName,
