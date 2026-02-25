@@ -7,10 +7,9 @@
 NODE_HOME=~/.enoki
 NODE_MONIKER=enoki-test
 SERVICE_NAME=enokid
-CHAIN_VERSION=v1.8.0
-CHAIN_BINARY_URL=https://github.com/hyphacoop/cosmos-enoki/releases/download/$CHAIN_VERSION/enoki_${CHAIN_VERSION}_linux_amd64.tar.gz
 DENOM=uoki
 GAS_PRICE=0.001$DENOM
+GO_VERSION=1.25.7
 # ***
 
 CHAIN_BINARY='enokid'
@@ -25,6 +24,11 @@ SYNC_RPC_SERVERS="$SYNC_RPC_1,$SYNC_RPC_2"
 echo "> Installing curl, jq, and wget."
 sudo apt-get install curl jq wget -y
 
+echo "> Fetching chain version from RPC."
+CHAIN_VERSION=$(curl -s https://rpc.sentry-01.enoki.polypore.xyz/abci_info | jq -r '.result.response.version')
+echo "Chain version: $CHAIN_VERSION"
+CHAIN_BINARY_URL=https://github.com/hyphacoop/cosmos-enoki/releases/download/$CHAIN_VERSION/enoki_${CHAIN_VERSION}_linux_amd64.tar.gz
+
 echo "> Adding binaries to path."
 mkdir -p $HOME/go/bin
 export PATH=$PATH:$HOME/go/bin
@@ -32,8 +36,8 @@ export PATH=$PATH:$HOME/go/bin
 # echo "> Installing Enoki binary."
 # echo "Installing go..."
 # rm go*linux-amd64.tar.gz
-# wget https://go.dev/dl/go1.23.8.linux-amd64.tar.gz
-# sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.23.8.linux-amd64.tar.gz
+# wget https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz
+# sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
 # export PATH=$PATH:/usr/local/go/bin
 # sudo apt install build-essential -y
 # cd $HOME
