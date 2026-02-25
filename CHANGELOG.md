@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## UNRELEASED
+
+### FEATURES
+
+* Remove deprecated x/group module
+
 ## v1.9.0
 
 **2025-FEB-25**

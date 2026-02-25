@@ -122,9 +122,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	"github.com/cosmos/cosmos-sdk/x/group"
-	groupkeeper "github.com/cosmos/cosmos-sdk/x/group/keeper"
-	groupmodule "github.com/cosmos/cosmos-sdk/x/group/module"
 	"github.com/cosmos/cosmos-sdk/x/mint"
 	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
@@ -242,7 +239,6 @@ type EnokiApp struct {
 	AuthzKeeper           authzkeeper.Keeper
 	EvidenceKeeper        evidencekeeper.Keeper
 	FeeGrantKeeper        feegrantkeeper.Keeper
-	GroupKeeper           groupkeeper.Keeper
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
 	CircuitKeeper         circuitkeeper.Keeper
 
@@ -344,7 +340,6 @@ func NewEnokiApp(
 		evidencetypes.StoreKey,
 		circuittypes.StoreKey,
 		authzkeeper.StoreKey,
-		group.StoreKey,
 		// non sdk store keys
 		ibcexported.StoreKey,
 		ibctransfertypes.StoreKey,
@@ -474,16 +469,6 @@ func NewEnokiApp(
 		appCodec,
 		app.MsgServiceRouter(),
 		app.AccountKeeper,
-	)
-
-	groupConfig := group.DefaultConfig()
-	groupConfig.MaxMetadataLen = 10000
-	app.GroupKeeper = groupkeeper.NewKeeper(
-		keys[group.StoreKey],
-		appCodec,
-		app.MsgServiceRouter(),
-		app.AccountKeeper,
-		groupConfig,
 	)
 
 	// get skipUpgradeHeights from the app options
@@ -800,7 +785,6 @@ func NewEnokiApp(
 		authzmodule.NewAppModule(appCodec, app.AuthzKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		ibc.NewAppModule(app.IBCKeeper),
 		ibcwasm.NewAppModule(app.WasmClientKeeper),
-		groupmodule.NewAppModule(appCodec, app.GroupKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		consensus.NewAppModule(appCodec, app.ConsensusParamsKeeper),
 		circuit.NewAppModule(appCodec, app.CircuitKeeper),
 		wasm.NewAppModule(appCodec, &app.WasmKeeper,
@@ -868,7 +852,6 @@ func NewEnokiApp(
 		govtypes.ModuleName,
 		stakingtypes.ModuleName,
 		// additional non simd modules
-		group.ModuleName,
 		ibcexported.ModuleName,
 		ibctransfertypes.ModuleName,
 		icatypes.ModuleName,
@@ -918,7 +901,6 @@ func NewEnokiApp(
 		feegrant.ModuleName,
 		packetforwardtypes.ModuleName,
 		ratelimittypes.ModuleName,
-		group.ModuleName,
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		feemarkettypes.ModuleName,
