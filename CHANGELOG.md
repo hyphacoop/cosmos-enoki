@@ -1,9 +1,12 @@
 # CHANGELOG
 
-## UNRELEASED
+## v1.9.0
+
+**2025-FEB-25**
 
 ### DEPENDENCIES
 
+* Bump cosmos-sdk to [v0.53.6](https://github.com/cosmos/cosmos-sdk/releases/tag/v0.53.6)
 * Bump wasmd to [v0.60.5](https://github.com/CosmWasm/wasmd/releases/tag/v0.60.5)
 * Bump wasmvm to [v2.3.2](https://github.com/CosmWasm/wasmvm/releases/tag/v2.3.2)
 * Bump go to v1.25.7
