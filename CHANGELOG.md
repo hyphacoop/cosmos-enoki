@@ -5,6 +5,7 @@
 ### FEATURES
 
 * Remove deprecated x/group module
+* Remove deprecated x/circuit module
 
 ## v1.9.0
 

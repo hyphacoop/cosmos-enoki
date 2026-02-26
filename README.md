@@ -7,7 +7,6 @@ Enoki is Hypha's reference binary for the Interchain stack. There is a [public t
 ## Features
 
 * Modules
-  * Circuit
   * tokenfactory
   * Feemarket
   * Wasmd

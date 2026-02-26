@@ -62,9 +62,6 @@ import (
 	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
-	"cosmossdk.io/x/circuit"
-	circuitkeeper "cosmossdk.io/x/circuit/keeper"
-	circuittypes "cosmossdk.io/x/circuit/types"
 	"cosmossdk.io/x/evidence"
 	evidencekeeper "cosmossdk.io/x/evidence/keeper"
 	evidencetypes "cosmossdk.io/x/evidence/types"
@@ -240,7 +237,6 @@ type EnokiApp struct {
 	EvidenceKeeper        evidencekeeper.Keeper
 	FeeGrantKeeper        feegrantkeeper.Keeper
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
-	CircuitKeeper         circuitkeeper.Keeper
 
 	IBCKeeper           *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
 	WasmClientKeeper    ibcwasmkeeper.Keeper
@@ -338,7 +334,6 @@ func NewEnokiApp(
 		upgradetypes.StoreKey,
 		feegrant.StoreKey,
 		evidencetypes.StoreKey,
-		circuittypes.StoreKey,
 		authzkeeper.StoreKey,
 		// non sdk store keys
 		ibcexported.StoreKey,
@@ -455,14 +450,6 @@ func NewEnokiApp(
 	)
 
 	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, runtime.NewKVStoreService(keys[feegrant.StoreKey]), app.AccountKeeper)
-
-	app.CircuitKeeper = circuitkeeper.NewKeeper(
-		appCodec,
-		runtime.NewKVStoreService(keys[circuittypes.StoreKey]),
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-		app.AccountKeeper.AddressCodec(),
-	)
-	app.BaseApp.SetCircuitBreaker(&app.CircuitKeeper)
 
 	app.AuthzKeeper = authzkeeper.NewKeeper(
 		runtime.NewKVStoreService(keys[authzkeeper.StoreKey]),
@@ -786,7 +773,6 @@ func NewEnokiApp(
 		ibc.NewAppModule(app.IBCKeeper),
 		ibcwasm.NewAppModule(app.WasmClientKeeper),
 		consensus.NewAppModule(appCodec, app.ConsensusParamsKeeper),
-		circuit.NewAppModule(appCodec, app.CircuitKeeper),
 		wasm.NewAppModule(appCodec, &app.WasmKeeper,
 			app.StakingKeeper,
 			app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), nil,
@@ -906,7 +892,6 @@ func NewEnokiApp(
 		feemarkettypes.ModuleName,
 		tokenfactorytypes.ModuleName,
 		consensusparamtypes.ModuleName,
-		circuittypes.ModuleName,
 		// additional non simd modules
 		wasmtypes.ModuleName, // wasm after ibc transfer
 		ibcwasmtypes.ModuleName,
@@ -964,7 +949,6 @@ func NewEnokiApp(
 			Codec:                 appCodec,
 			IBCKeeper:             app.IBCKeeper,
 			WasmConfig:            &wasmConfig,
-			CircuitKeeper:         &app.CircuitKeeper,
 			FeeMarketKeeper:       app.FeeMarketKeeper,
 			TXCounterStoreService: runtime.NewKVStoreService(app.keys[wasmtypes.StoreKey]),
 		},
