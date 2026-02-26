@@ -2,7 +2,7 @@ name: E2E
 
 on:
   workflow_dispatch:
-  # push:
+  push:
   pull_request:
     branches:
       - main
@@ -76,36 +76,77 @@ jobs:
           name: ${{ env.IMAGE_NAME }}
           path: ${{ env.TAR_PATH }}
 
-  e2e-tests:
+  # e2e-tests:
+  #   needs: build-docker
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       # names of `make` commands to run tests
+  #       test:
+  #         - "ictest-basic"
+  #         - "ictest-wasm"
+  #         - "ictest-ibc"  #
+  #         - "ictest-packetforward"  #
+  #         - "ictest-ratelimit"  #
+  #         - "ictest-feemarket"
+  #         - "ictest-tokenfactory"
+  #     fail-fast: false
+
+  #   steps:
+  #     - id: go-cache-paths
+  #       run: |
+  #         echo "go-build=$(go env GOCACHE)" >> $GITHUB_OUTPUT
+  #         echo "go-mod=$(go env GOMODCACHE)" >> $GITHUB_OUTPUT
+
+  #     - name: Set up Go ${{ env.GO_VERSION }}
+  #       uses: actions/setup-go@v4
+  #       with:
+  #         go-version: ${{ env.GO_VERSION }}
+  #         cache-dependency-path: interchaintest/go.sum
+
+  #     - name: checkout chain
+  #       uses: actions/checkout@v4
+
+  #     # Cache go build cache, used to speedup go test
+  #     - name: Go Build Cache
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ${{ steps.go-cache-paths.outputs.go-build }}
+  #         key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+
+  #     - name: Download Tarball Artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: ${{ env.IMAGE_NAME }}
+  #         path: /tmp
+
+  #     - name: Load Docker Image
+  #       run: |
+  #         docker image load -i ${{ env.TAR_PATH }}
+  #         docker image ls -a
+
+  #     - name: Run Test
+  #       run: make ${{ matrix.test }}
+
+  upgrade-test:
     needs: build-docker
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # names of `make` commands to run tests
-        test:
-          - "ictest-basic"
-          - "ictest-wasm"
-          - "ictest-ibc"  #
-          - "ictest-packetforward"  #
-          - "ictest-ratelimit"  #
-          - "ictest-feemarket"
-          - "ictest-tokenfactory"
-      fail-fast: false
-
     steps:
       - id: go-cache-paths
         run: |
           echo "go-build=$(go env GOCACHE)" >> $GITHUB_OUTPUT
           echo "go-mod=$(go env GOMODCACHE)" >> $GITHUB_OUTPUT
 
+      - name: checkout chain
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for release detection
+
       - name: Set up Go ${{ env.GO_VERSION }}
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: interchaintest/go.sum
-
-      - name: checkout chain
-        uses: actions/checkout@v4
 
       # Cache go build cache, used to speedup go test
       - name: Go Build Cache
@@ -114,16 +155,126 @@ jobs:
           path: ${{ steps.go-cache-paths.outputs.go-build }}
           key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
 
+      - name: Determine upgrade versions
+        id: versions
+        run: |
+          # Get latest GitHub release version
+          LATEST_RELEASE=$(gh release list --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || echo "")
+          
+          if [ -z "$LATEST_RELEASE" ]; then
+            echo "No GitHub releases found, skipping upgrade test"
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Latest release: $LATEST_RELEASE"
+          echo "pre-upgrade-version=$LATEST_RELEASE" >> $GITHUB_OUTPUT
+          
+          # Find latest upgrade version from app/upgrades directories
+          # Convert directory names like v1_9_0 to semver like v1.9.0
+          LATEST_UPGRADE=""
+          LATEST_UPGRADE_MAJOR=0
+          LATEST_UPGRADE_MINOR=0
+          LATEST_UPGRADE_PATCH=0
+          
+          for dir in app/upgrades/v*_*_*/; do
+            if [ -d "$dir" ]; then
+              # Extract version from directory name (e.g., v1_9_0 -> v1.9.0)
+              VERSION=$(basename "$dir" | sed 's/_/./g')
+              
+              # Parse semver components
+              if [[ $VERSION =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+                MAJOR="${BASH_REMATCH[1]}"
+                MINOR="${BASH_REMATCH[2]}"
+                PATCH="${BASH_REMATCH[3]}"
+                
+                # Compare versions
+                if [ $MAJOR -gt $LATEST_UPGRADE_MAJOR ] || \
+                   ([ $MAJOR -eq $LATEST_UPGRADE_MAJOR ] && [ $MINOR -gt $LATEST_UPGRADE_MINOR ]) || \
+                   ([ $MAJOR -eq $LATEST_UPGRADE_MAJOR ] && [ $MINOR -eq $LATEST_UPGRADE_MINOR ] && [ $PATCH -gt $LATEST_UPGRADE_PATCH ]); then
+                  LATEST_UPGRADE=$VERSION
+                  LATEST_UPGRADE_MAJOR=$MAJOR
+                  LATEST_UPGRADE_MINOR=$MINOR
+                  LATEST_UPGRADE_PATCH=$PATCH
+                fi
+              fi
+            fi
+          done
+          
+          if [ -z "$LATEST_UPGRADE" ]; then
+            echo "No upgrade versions found in app/upgrades, skipping upgrade test"
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Latest upgrade: $LATEST_UPGRADE"
+          echo "upgrade-name=$LATEST_UPGRADE" >> $GITHUB_OUTPUT
+          
+          # Parse release version for comparison
+          if [[ $LATEST_RELEASE =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+            RELEASE_MAJOR="${BASH_REMATCH[1]}"
+            RELEASE_MINOR="${BASH_REMATCH[2]}"
+            RELEASE_PATCH="${BASH_REMATCH[3]}"
+          else
+            echo "Could not parse release version $LATEST_RELEASE, skipping upgrade test"
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Compare: skip if upgrade version is not higher than release version
+          if [ $LATEST_UPGRADE_MAJOR -lt $RELEASE_MAJOR ] || \
+             ([ $LATEST_UPGRADE_MAJOR -eq $RELEASE_MAJOR ] && [ $LATEST_UPGRADE_MINOR -lt $RELEASE_MINOR ]) || \
+             ([ $LATEST_UPGRADE_MAJOR -eq $RELEASE_MAJOR ] && [ $LATEST_UPGRADE_MINOR -eq $RELEASE_MINOR ] && [ $LATEST_UPGRADE_PATCH -le $RELEASE_PATCH ]); then
+            echo "Upgrade version $LATEST_UPGRADE is not higher than release version $LATEST_RELEASE, skipping upgrade test"
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Upgrade test will run: $LATEST_RELEASE -> $LATEST_UPGRADE"
+          echo "skip=false" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Download Tarball Artifact
+        if: steps.versions.outputs.skip != 'true'
         uses: actions/download-artifact@v4
         with:
           name: ${{ env.IMAGE_NAME }}
           path: /tmp
 
-      - name: Load Docker Image
+      - name: Load Docker Images
+        if: steps.versions.outputs.skip != 'true'
         run: |
+          # Load the locally built image
           docker image load -i ${{ env.TAR_PATH }}
           docker image ls -a
+          
+          # Tag the local image with 'local' version for upgrade test
+          docker tag enoki:local enoki:local
+          
+          # Pull the pre-upgrade image from GitHub Container Registry
+          PRE_VERSION=${{ steps.versions.outputs.pre-upgrade-version }}
+          echo "Pulling pre-upgrade image: ghcr.io/${{ github.repository }}:${PRE_VERSION}"
+          docker pull ghcr.io/${{ github.repository }}:${PRE_VERSION} || {
+            echo "Failed to pull pre-upgrade image from ghcr.io, trying docker.io"
+            docker pull enoki:${PRE_VERSION} || {
+              echo "ERROR: Could not pull pre-upgrade image for version ${PRE_VERSION}"
+              echo "Please ensure the image exists in the package registry"
+              exit 1
+            }
+          }
+          
+          # Tag the pulled image for the test
+          docker tag ghcr.io/${{ github.repository }}:${PRE_VERSION} enoki:${PRE_VERSION} 2>/dev/null || true
+          
+          docker image ls -a
 
-      - name: Run Test
-        run: make ${{ matrix.test }}
+      - name: Run Upgrade Test
+        if: steps.versions.outputs.skip != 'true'
+        run: |
+          cd interchaintest
+          go test -v -count=1 -run TestChainUpgrade \
+            -pre-upgrade-version ${{ steps.versions.outputs.pre-upgrade-version }} \
+            -post-upgrade-version local \
+            -upgrade-name ${{ steps.versions.outputs.upgrade-name }} \
+            -timeout 30m
