@@ -275,9 +275,8 @@ jobs:
           go install github.com/mfridman/tparse@latest
           cd interchaintest
           set -o pipefail
-          go test -v -count=1 -run ./... TestChainUpgrade -json \
+          go test -v -count=1 -run TestChainUpgrade -timeout 30m -json . \
             -pre-upgrade-version ${{ steps.versions.outputs.pre-upgrade-version }} \
             -post-upgrade-version local \
             -upgrade-name ${{ steps.versions.outputs.upgrade-name }} \
-            -timeout 30m \
             | tparse -follow -all
