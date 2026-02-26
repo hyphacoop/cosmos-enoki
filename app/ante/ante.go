@@ -10,7 +10,6 @@ import (
 
 	corestoretypes "cosmossdk.io/core/store"
 	storetypes "cosmossdk.io/store/types"
-	circuitante "cosmossdk.io/x/circuit/ante"
 	txsigning "cosmossdk.io/x/tx/signing"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -35,7 +34,6 @@ type HandlerOptions struct {
 	IBCKeeper              *ibckeeper.Keeper
 	WasmConfig             *wasmtypes.NodeConfig
 	TXCounterStoreService  corestoretypes.KVStoreService
-	CircuitKeeper          circuitante.CircuitBreaker
 	TxFeeChecker           ante.TxFeeChecker
 	FeeMarketKeeper        *feemarketkeeper.Keeper
 }
@@ -65,7 +63,6 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 		ante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
 		wasmkeeper.NewLimitSimulationGasDecorator(options.WasmConfig.SimulationGasLimit), // after setup context to enforce limits early
 		wasmkeeper.NewCountTXDecorator(options.TXCounterStoreService),
-		circuitante.NewCircuitBreakerDecorator(options.CircuitKeeper),
 		ante.NewValidateBasicDecorator(),
 		ante.NewTxTimeoutHeightDecorator(),
 		ante.NewValidateMemoDecorator(options.AccountKeeper),

@@ -7,6 +7,7 @@ import (
 
 	errorsmod "cosmossdk.io/errors"
 	storetypes "cosmossdk.io/store/types"
+	circuittypes "cosmossdk.io/x/circuit/types"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -22,7 +23,7 @@ func NewUpgrade() upgrades.Upgrade {
 		UpgradeName:          UpgradeName,
 		CreateUpgradeHandler: CreateUpgradeHandler,
 		StoreUpgrades: storetypes.StoreUpgrades{
-			Deleted: []string{grouptypes.ModuleName},
+			Deleted: []string{grouptypes.ModuleName, circuittypes.ModuleName},
 		},
 	}
 }
@@ -40,6 +41,10 @@ func CreateUpgradeHandler(
 		// Remove x/group from the version map so it is excluded from migrations
 		ctx.Logger().Info("Removing x/group module")
 		delete(fromVM, grouptypes.ModuleName)
+
+		// Remove x/circuit from the version map so it is excluded from migrations
+		ctx.Logger().Info("Removing x/circuit module")
+		delete(fromVM, circuittypes.ModuleName)
 
 		// Run migrations
 		fromVM, err := mm.RunMigrations(ctx, configurator, fromVM)
