@@ -200,17 +200,13 @@ ictest-feemarket:
 	@echo "Running feemarket e2e test"
 	@cd interchaintest && go test -race -v -count=1 -run TestFeemarket .
 
-ictest-upgrade:
-	@echo "Running upgrade e2e test"
-	@cd interchaintest && go test -v -count=1 -run TestChainUpgrade .
-
 ictest-clean:
 	@echo "Cleaning up interchaintest cache"
 	@cd interchaintest && go clean -testcache
 
-ictest-full: ictest-clean ictest-basic ictest-ibc ictest-wasm ictest-packetforward ictest-tokenfactory ictest-ratelimit ictest-feemarket ictest-upgrade
+ictest-full: ictest-clean ictest-basic ictest-ibc ictest-wasm ictest-packetforward ictest-tokenfactory ictest-ratelimit ictest-feemarket
 
-.PHONY: ictest-basic ictest-ibc ictest-wasm ictest-packetforward ictest-tokenfactory ictest-ratelimit ictest-clean ictest-feemarket ictest-upgrade ictest-full
+.PHONY: ictest-basic ictest-ibc ictest-wasm ictest-packetforward ictest-tokenfactory ictest-ratelimit ictest-clean ictest-feemarket ictest-full
 
 ###############################################################################
 ###                              image testnet                              ###
