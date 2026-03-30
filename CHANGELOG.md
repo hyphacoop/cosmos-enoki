@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## UNRELEASED
+## v2.0.0
+
+**2026-MAR-30**
 
 ### FEATURES
 
@@ -9,7 +11,7 @@
 
 ## v1.9.0
 
-**2025-FEB-25**
+**2026-FEB-25**
 
 ### DEPENDENCIES
 
