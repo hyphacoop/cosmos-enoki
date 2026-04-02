@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## UNRELEASED
+
+* Bump wasmd to [v0.60.6](https://github.com/CosmWasm/wasmd/releases/tag/v0.60.6)
+
+### DEPENDENCIES
+
 ## v2.0.0
 
 **2026-MAR-30**
