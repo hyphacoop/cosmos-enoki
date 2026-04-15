@@ -3,6 +3,7 @@
 ## UNRELEASED
 
 * Bump wasmd to [v0.60.6](https://github.com/CosmWasm/wasmd/releases/tag/v0.60.6)
+* Bump ibc-go to [v10.5.1](https://github.com/cosmos/ibc-go/releases/tag/v10.5.1)
 
 ### DEPENDENCIES
 
