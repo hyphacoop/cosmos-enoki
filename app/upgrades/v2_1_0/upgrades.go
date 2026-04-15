@@ -1,4 +1,4 @@
-package v1_7_0
+package v2_1_0
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 )
 
-const UpgradeName = "v1.7.0"
+const UpgradeName = "v2.1.0"
 
 // NewUpgrade constructor
 func NewUpgrade() upgrades.Upgrade {
@@ -32,7 +32,7 @@ func CreateUpgradeHandler(
 
 		ctx.Logger().Info("Starting upgrade", "name", UpgradeName)
 
-		// Run migrations to ensure compatibility with new modules
+		// Run migrations
 		fromVM, err := mm.RunMigrations(ctx, configurator, fromVM)
 		if err != nil {
 			return fromVM, errorsmod.Wrapf(err, "running module migrations")
@@ -40,6 +40,5 @@ func CreateUpgradeHandler(
 
 		ctx.Logger().Info("Upgrade complete", "name", UpgradeName)
 		return fromVM, nil
-
 	}
 }
