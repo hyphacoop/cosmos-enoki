@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v2.2.0
+
+**2026-APR-29**
+
+* Bump ibc-go to [v10.6.0](https://github.com/cosmos/ibc-go/releases/tag/v10.6.0)
+* Bump pfm to [v10.6.0](https://github.com/cosmos/ibc-apps/releases/tag/middleware%2Fpacket-forward-middleware%2Fv10.6.0)
+
 ## v2.1.0
 
 **2026-APR-15**
