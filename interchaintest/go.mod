@@ -17,7 +17,7 @@ require (
 	cosmossdk.io/math v1.5.3
 	github.com/CosmWasm/wasmd v0.60.2
 	github.com/cosmos/cosmos-sdk v0.53.4
-	github.com/cosmos/ibc-go/v10 v10.5.0
+	github.com/cosmos/ibc-go/v10 v10.6.0
 	github.com/cosmos/interchaintest/v10 v10.0.1
 	github.com/cosmos/tokenfactory v0.53.5
 	github.com/moby/moby v27.5.1+incompatible
