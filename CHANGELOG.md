@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## UNRELEASED
+
+### DEPENDENCIES
+
+* Bump cosmos-sdk to [v0.53.7](https://github.com/cosmos/cosmos-sdk/releases/tag/v0.53.7)
+
 ## v2.2.0
 
 **2026-APR-29**
