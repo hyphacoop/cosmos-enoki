@@ -1,8 +1,7 @@
-[![Join Enoki Testnet](https://github.com/hyphacoop/cosmos-enoki/actions/workflows/join-testnet.yml/badge.svg)](https://github.com/hyphacoop/cosmos-enoki/actions/workflows/join-testnet.yml)
 
 # Enoki 🍄
 
-Enoki is Hypha's reference binary for the Interchain stack. There is a [public testnet available](/testnet/README.md)!
+Enoki is Hypha's reference binary for the Interchain stack.
 
 ## Features
 
@@ -23,8 +22,6 @@ Enoki is Hypha's reference binary for the Interchain stack. There is a [public t
   - Builds the chain's binary
 - `docker build -t enoki:local .`
   - Builds the chain's Docker image
-
-## [Public Testnet](/testnet/README.md)
 
 ## Local Testnet
 
