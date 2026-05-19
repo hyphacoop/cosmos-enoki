@@ -24,8 +24,6 @@ Enoki is Hypha's reference binary for the Interchain stack. There is a [public t
 - `docker build -t enoki:local .`
   - Builds the chain's Docker image
 
-## [Public Testnet](/testnet/README.md)
-
 ## Local Testnet
 
 - `make sh-testnet`
